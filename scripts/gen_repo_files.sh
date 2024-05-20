@@ -80,20 +80,6 @@ generate_packages_manifest() {
     echo "Packages.manifest file generated at $manifest_file"
 }
 
-# Function to sign the Packages file
-sign_packages() {
-    packages_file=$1
-    sig_file=$2
-
-    echo "Signing the Packages file..."
-    "$USIGN_PATH" -S -m "$packages_file" -s "$KEY_DIR"/openWrtUsign.key -x "$sig_file"
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to sign the Packages file"
-        exit 1
-    fi
-    echo "Packages.sig file generated at $sig_file"
-}
-
 # Main script
 packages_file="$REPO_DIR/Packages"
 packages_manifest_file="$REPO_DIR/Packages.manifest"
@@ -102,6 +88,9 @@ packages_sig_file="$REPO_DIR/Packages.sig"
 generate_packages "./repo/IPK_files" "$packages_file"
 generate_packages_gz "$packages_file"
 generate_packages_manifest "$packages_file" "$packages_manifest_file"
-sign_packages "$packages_file" "$packages_sig_file"
+
+# Call the signing script
+chmod +x ./scripts/sign_packages.sh
+./scripts/sign_packages.sh "$packages_file" "$packages_sig_file" "$KEY_DIR/openWrtUsign.key" "$USIGN_PATH"
 
 echo "Repository files have been generated and signed in $REPO_DIR"

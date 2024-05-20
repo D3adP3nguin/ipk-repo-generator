@@ -53,19 +53,3 @@ jobs:
     - name: Run IPK repository generator script
       run: |
         chmod +x ./scripts/gen_repo_files.sh
-        ./scripts/gen_repo_files.sh
-
-    - name: Debug usign command
-      run: |
-        echo "Attempting to sign the Packages file..."
-        ./repo/usign/build/usign -S -m ./output/Packages -s ./keys/openWrtUsign.key -x ./output/Packages.sig || echo "usign failed with exit code $?"
-        echo "Contents of the output directory after signing attempt:"
-        ls -l ./output
-        echo "Contents of the generated Packages.sig file (if created):"
-        cat ./output/Packages.sig || echo "Packages.sig file does not exist"
-
-    - name: Upload generated files
-      uses: actions/upload-artifact@v2
-      with:
-        name: repo-files
-        path: ./output/
