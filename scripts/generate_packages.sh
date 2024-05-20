@@ -8,12 +8,19 @@ extract_control_from_ipk() {
 
     echo "Extracting control file from $ipk_file..."
 
+    # Debug: Check the IPK file format
+    file "$ipk_file"
+
     # Decompress the IPK file (gzip compressed)
     gzip -d -c "$ipk_file" > temp.tar
     if [ $? -ne 0 ]; then
         echo "Error: Failed to decompress $ipk_file"
         exit 1
     fi
+
+    # Debug: List contents of the decompressed tar file
+    echo "Contents of temp.tar:"
+    tar -tf temp.tar
 
     # Extract control.tar.gz from the tar archive
     tar --strip-components=1 -xf temp.tar ./control.tar.gz
@@ -22,6 +29,10 @@ extract_control_from_ipk() {
         rm temp.tar
         exit 1
     fi
+
+    # Debug: List contents of control.tar.gz
+    echo "Contents of control.tar.gz:"
+    tar -tzf control.tar.gz
 
     # Extract control file from control.tar.gz
     tar -xzOf control.tar.gz ./control >> "$output_file"
@@ -57,6 +68,9 @@ generate_packages() {
     done
 
     echo "Packages file generated at $output_file"
+    # Debug: Print the contents of the Packages file
+    echo "Contents of the Packages file after generation:"
+    cat "$output_file"
 }
 
 # Main script
@@ -64,10 +78,6 @@ repo_dir="./repo/IPK_files"
 packages_file="./output/Packages"
 
 generate_packages "$repo_dir" "$packages_file"
-
-# Debug: Print the contents of the Packages file
-echo "Contents of the Packages file:"
-cat "$packages_file"
 
 # Verify the Packages file is not empty
 if [ ! -s "$packages_file" ]; then
