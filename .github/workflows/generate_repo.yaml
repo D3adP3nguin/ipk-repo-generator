@@ -26,6 +26,15 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gzip tar coreutils
 
+    - name: Create necessary directories
+      run: |
+        mkdir -p ./repo/IPK_files
+        mkdir -p ./repo/usign/build
+
+    - name: Copy precompiled usign binary
+      run: |
+        cp ./usign/build/usign ./repo/usign/build/usign
+
     - name: Run IPK repository generator script
       run: |
         chmod +x ./scripts/gen_repo_files.sh

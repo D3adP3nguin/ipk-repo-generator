@@ -5,6 +5,10 @@ REPO_DIR="./repo/IPK_files"
 KEY_DIR="./keys"
 USIGN_PATH="./repo/usign/build/usign"
 
+# Ensure necessary directories exist
+mkdir -p "$REPO_DIR"
+mkdir -p "$(dirname "$USIGN_PATH")"
+
 # Function to extract control file from IPK
 extract_control_from_ipk() {
     ipk_file=$1
