@@ -17,6 +17,9 @@ extract_control_from_ipk() {
 
     echo "Extracting control file from $ipk_file..."
 
+    # Debug: Check the IPK file format
+    file "$ipk_file"
+
     # Decompress the IPK file (gzip compressed)
     gzip -d -c "$ipk_file" > temp.tar
     if [ $? -ne 0 ]; then
@@ -99,6 +102,17 @@ packages_manifest_file="$REPO_DIR/Packages.manifest"
 packages_sig_file="$REPO_DIR/Packages.sig"
 
 generate_packages "./repo/IPK_files" "$packages_file"
+
+# Debug: Print the contents of the Packages file
+echo "Contents of the Packages file:"
+cat "$packages_file"
+
+# Verify the Packages file is not empty
+if [ ! -s "$packages_file" ]; then
+    echo "Error: Packages file is empty or does not exist."
+    exit 1
+fi
+
 generate_packages_gz "$packages_file"
 generate_packages_manifest "$packages_file" "$packages_manifest_file"
 
