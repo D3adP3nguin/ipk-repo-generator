@@ -41,10 +41,6 @@ jobs:
       run: |
         chmod +x ./repo/usign/build/usign
 
-    - name: Write private key from base64 string
-      run: |
-        echo "dW50cnVzdGVkIGNvbW1lbnQ6IHByaXZhdGUga2V5IDU5OTMwMzM1MzQ3NzkxZmUKUldSQ1N3QUFBQUFDNzFUYlJzL3RWNTRNbzMwVGxWNkgwY0FMZ1NlUHA5V05aa3dNMU5IZVIvc2pBaU5NRTdPYzlgZnNaOW1STzJTd0VjRiteSFpzUUdEbit6cGx5eFFzN0pUUlViR2ZaajdYSUEvZVB2K1lSS0VGWDNRN2Y0c3BkeVJMUGdKcW5qdTBMTT0K" | base64 --decode > ./keys/openWrtUsign.key
-
     - name: Debug private key
       run: |
         echo "Contents of the private key file:"
@@ -53,3 +49,10 @@ jobs:
     - name: Run IPK repository generator script
       run: |
         chmod +x ./scripts/gen_repo_files.sh
+        ./scripts/gen_repo_files.sh
+
+    - name: Upload generated files
+      uses: actions/upload-artifact@v2
+      with:
+        name: repo-files
+        path: ./output/
