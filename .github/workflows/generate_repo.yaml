@@ -43,7 +43,7 @@ jobs:
 
     - name: Write private key from secret
       run: |
-        echo "$USIGN_PRIVATE_KEY" > ./keys/openWrtUsign.key
+        echo "${{ secrets.USIGN_PRIVATE_KEY }}" > ./keys/openWrtUsign.key
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
 
