@@ -56,7 +56,12 @@ generate_packages() {
     echo "Generating Packages file..."
     > "$output_file" # Empty the file
 
+    # Debug: List all IPK files found
+    echo "Looking for IPK files in $repo_dir"
+    find "$repo_dir" -type f -name '*.ipk'
+    
     find "$repo_dir" -type f -name '*.ipk' | while read -r ipk; do
+        echo "Processing IPK file: $ipk"
         extract_control_from_ipk "$ipk" "$output_file"
     done
 
