@@ -46,25 +46,10 @@ jobs:
         echo "Contents of the private key file:"
         cat ./keys/openWrtUsign.key
 
-    - name: Generate Packages file
+    - name: Generate repository files
       run: |
-        chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh
-
-    - name: Compress Packages file
-      run: |
-        chmod +x ./scripts/compress_packages.sh
-        ./scripts/compress_packages.sh
-
-    - name: Generate Packages manifest
-      run: |
-        chmod +x ./scripts/generate_manifest.sh
-        ./scripts/generate_manifest.sh
-
-    - name: Sign Packages file
-      run: |
-        chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh
+        chmod +x ./scripts/gen_repo_files.sh
+        ./scripts/gen_repo_files.sh
 
     - name: Debug output directory
       run: |
@@ -72,6 +57,8 @@ jobs:
         ls -l ./output
         echo "Contents of the Packages file:"
         cat ./output/Packages
+        echo "Contents of the Packages.gz file:"
+        gzip -d -c ./output/Packages.gz | cat
         echo "Contents of the Packages manifest file:"
         cat ./output/Packages.manifest
 
