@@ -39,20 +39,32 @@ extract_control_from_ipk() {
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
+# Function to generate Packages file
+generate_packages() {
+    repo_dir=$1
+    output_file=$2
+
+    echo "Generating Packages file..."
+    > "$output_file" # Empty the file
+
+    # Debug: List all IPK files found
+    echo "Looking for IPK files in $repo_dir"
+    find "$repo_dir" -type f -name '*.ipk'
+
+    find "$repo_dir" -type f -name '*.ipk' | while read -r ipk; do
+        echo "Processing IPK file: $ipk"
+        extract_control_from_ipk "$ipk" "$output_file"
+    done
+
+    echo "Packages file generated at $output_file"
+}
+
 # Main script
 repo_dir="./repo/IPK_files"
 packages_file="./output/Packages"
 
-echo "Generating Packages file..."
-> "$packages_file" # Empty the file
+generate_packages "$repo_dir" "$packages_file"
 
-# Debug: List all IPK files found
-echo "Looking for IPK files in $repo_dir"
-find "$repo_dir" -type f -name '*.ipk'
-
-find "$repo_dir" -type f -name '*.ipk' | while read -r ipk; do
-    echo "Processing IPK file: $ipk"
-    extract_control_from_ipk "$ipk" "$packages_file"
-done
-
-echo "Packages file generated at $packages_file"
+# Debug: Print the contents of the Packages file
+echo "Contents of the Packages file:"
+cat "$packages_file"
