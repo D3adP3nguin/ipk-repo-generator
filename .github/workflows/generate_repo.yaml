@@ -1,0 +1,38 @@
+name: Generate IPK Repository Files
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gzip tar md5sum
+
+    - name: Run IPK repository generator script
+      run: |
+        chmod +x ./scripts/gen_repo_files.sh
+        ./scripts/gen_repo_files.sh
+
+    - name: Upload generated files
+      uses: actions/upload-artifact@v2
+      with:
+        name: repo-files
+        path: ./repo/IPK_files/
