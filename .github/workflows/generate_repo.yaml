@@ -69,4 +69,14 @@ jobs:
     - name: Debug output directory
       run: |
         echo "Contents of the output directory:"
-   
+        ls -l ./output
+        echo "Contents of the Packages file:"
+        cat ./output/Packages
+        echo "Contents of the Packages manifest file:"
+        cat ./output/Packages.manifest
+
+    - name: Upload generated files
+      uses: actions/upload-artifact@v2
+      with:
+        name: repo-files
+        path: ./output/

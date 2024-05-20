@@ -13,6 +13,22 @@ echo "Signature file: $signature_file"
 echo "Key file: $key_file"
 echo "Usign path: $usign_path"
 
+# Print current working directory
+echo "Current working directory:"
+pwd
+
+# List files in current directory
+echo "Files in current directory:"
+ls -l
+
+# List files in output directory
+echo "Files in output directory:"
+ls -l ./output
+
+# List files in keys directory
+echo "Files in keys directory:"
+ls -l ./keys
+
 # Ensure the key file exists and is readable
 if [ ! -f "$key_file" ]; then
     echo "Error: Key file does not exist."
@@ -44,7 +60,7 @@ echo "Permissions of the usign binary:"
 ls -l "$usign_path"
 
 # Attempt to sign the Packages file and capture the output
-sign_command="$usign_path -S -m $packages_file -s $key_file -x $signature_file"
+sign_command="$(pwd)/$usign_path -S -m $(pwd)/$packages_file -s $(pwd)/$key_file -x $(pwd)/$signature_file"
 echo "Executing sign command: $sign_command"
 output=$($sign_command 2>&1)
 result=$?
