@@ -47,25 +47,22 @@ jobs:
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
 
+    - name: Debug private key
+      run: |
+        echo "Contents of the private key file:"
+        cat ./keys/openWrtUsign.key
+
     - name: Run IPK repository generator script
       run: |
         chmod +x ./scripts/gen_repo_files.sh
-        ./scripts/gen_repo_files.sh
+        ./scripts.gen_repo_files.sh
 
     - name: Debug usign command
       run: |
-        echo "Contents of the key file:"
-        cat ./keys/openWrtUsign.key
-
-        echo "Contents of the Packages file:"
-        cat ./output/Packages
-
         echo "Attempting to sign the Packages file..."
         ./repo/usign/build/usign -S -m ./output/Packages -s ./keys/openWrtUsign.key -x ./output/Packages.sig || echo "usign failed with exit code $?"
-
         echo "Contents of the output directory after signing attempt:"
         ls -l ./output
-
         echo "Contents of the generated Packages.sig file (if created):"
         cat ./output/Packages.sig || echo "Packages.sig file does not exist"
 
