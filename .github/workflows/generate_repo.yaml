@@ -51,6 +51,13 @@ jobs:
         chmod +x ./scripts/gen_repo_files.sh
         ./scripts/gen_repo_files.sh
 
+    - name: Debug output directory
+      run: |
+        echo "Contents of the output directory:"
+        ls -l ./output
+        cat ./output/Packages
+        cat ./output/Packages.manifest
+
     - name: Upload generated files
       uses: actions/upload-artifact@v2
       with:
