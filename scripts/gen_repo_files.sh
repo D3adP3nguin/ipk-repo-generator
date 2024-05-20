@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Hardcoded paths
-REPO_DIR="./repo/IPK_files"
+REPO_DIR="./output"
 KEY_DIR="./keys"
 USIGN_PATH="./repo/usign/build/usign"
 
@@ -99,7 +99,7 @@ packages_file="$REPO_DIR/Packages"
 packages_manifest_file="$REPO_DIR/Packages.manifest"
 packages_sig_file="$REPO_DIR/Packages.sig"
 
-generate_packages "$REPO_DIR" "$packages_file"
+generate_packages "./repo/IPK_files" "$packages_file"
 generate_packages_gz "$packages_file"
 generate_packages_manifest "$packages_file" "$packages_manifest_file"
 sign_packages "$packages_file" "$packages_sig_file"

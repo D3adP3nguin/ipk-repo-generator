@@ -30,6 +30,8 @@ jobs:
       run: |
         mkdir -p ./repo/IPK_files
         mkdir -p ./repo/usign/build
+        mkdir -p ./keys
+        mkdir -p ./output
 
     - name: Copy precompiled usign binary
       run: |
@@ -38,6 +40,12 @@ jobs:
     - name: Set execute permissions for usign
       run: |
         chmod +x ./repo/usign/build/usign
+
+    - name: Write private key from secret
+      run: |
+        echo "$USIGN_PRIVATE_KEY" > ./keys/openWrtUsign.key
+      env:
+        USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
 
     - name: Run IPK repository generator script
       run: |
@@ -48,4 +56,4 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: repo-files
-        path: ./repo/IPK_files/
+        path: ./output/
