@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Hardcoded paths
-REPO_DIR="/home/d3adpenguin/Desktop/RepoDepTest/package"
-KEY_DIR="/home/d3adpenguin/Desktop/RepoDepTest/keys_dir"
-USIGN_PATH="/home/d3adpenguin/Desktop/RepoDepTest/usign/build/usign"
+REPO_DIR="./repo/IPK_files"
+KEY_DIR="./keys"
+USIGN_PATH="./usign/build/usign"
 
 # Function to extract control file from IPK
 extract_control_from_ipk() {
