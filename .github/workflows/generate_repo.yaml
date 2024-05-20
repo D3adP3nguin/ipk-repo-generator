@@ -24,15 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gzip tar coreutils build-essential
-
-    - name: Compile usign
-      run: |
-        git clone https://git.openwrt.org/project/usign.git
-        cd usign
-        make
-        mkdir -p ../usign/build
-        cp usign ../usign/build/usign
+        sudo apt-get install -y gzip tar coreutils
 
     - name: Run IPK repository generator script
       run: |

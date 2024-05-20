@@ -3,7 +3,7 @@
 # Hardcoded paths
 REPO_DIR="./repo/IPK_files"
 KEY_DIR="./keys"
-USIGN_PATH="./usign/build/usign"
+USIGN_PATH="./repo/usign/build/usign"
 
 # Function to extract control file from IPK
 extract_control_from_ipk() {
