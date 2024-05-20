@@ -55,7 +55,7 @@ jobs:
     - name: Run IPK repository generator script
       run: |
         chmod +x ./scripts/gen_repo_files.sh
-        ./scripts.gen_repo_files.sh
+        ./scripts/gen_repo_files.sh
 
     - name: Debug usign command
       run: |
