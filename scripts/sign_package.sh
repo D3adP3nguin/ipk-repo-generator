@@ -1,27 +1,21 @@
 #!/bin/bash
 
 # Paths
-PACKAGES_FILE=$1
-SIGNATURE_FILE=$2
-KEY_FILE=$3
-USIGN_PATH=$4
+packages_file="./output/Packages"
+signature_file="./output/Packages.sig"
+key_file="./keys/openWrtUsign.key"
+usign_path="./repo/usign/build/usign"
 
-# Debug information
 echo "Signing the Packages file..."
-echo "Packages file: $PACKAGES_FILE"
-echo "Signature file: $SIGNATURE_FILE"
-echo "Key file: $KEY_FILE"
-echo "Usign path: $USIGN_PATH"
+echo "Packages file: $packages_file"
+echo "Signature file: $signature_file"
+echo "Key file: $key_file"
+echo "Usign path: $usign_path"
 
-# Print the contents of the key file
-echo "Contents of the key file:"
-cat "$KEY_FILE"
-
-# Attempt to sign the Packages file
-"$USIGN_PATH" -S -m "$PACKAGES_FILE" -s "$KEY_FILE" -x "$SIGNATURE_FILE"
+"$usign_path" -S -m "$packages_file" -s "$key_file" -x "$signature_file"
 if [ $? -ne 0 ]; then
     echo "Error: Failed to sign the Packages file"
     exit 1
 fi
 
-echo "Packages.sig file generated at $SIGNATURE_FILE"
+echo "Packages.sig file generated at $signature_file"

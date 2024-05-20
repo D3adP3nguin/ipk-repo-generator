@@ -46,10 +46,25 @@ jobs:
         echo "Contents of the private key file:"
         cat ./keys/openWrtUsign.key
 
-    - name: Run IPK repository generator script
+    - name: Generate Packages file
       run: |
-        chmod +x ./scripts/gen_repo_files.sh
-        ./scripts/gen_repo_files.sh
+        chmod +x ./scripts/generate_packages.sh
+        ./scripts/generate_packages.sh
+
+    - name: Compress Packages file
+      run: |
+        chmod +x ./scripts/compress_packages.sh
+        ./scripts/compress_packages.sh
+
+    - name: Generate Packages manifest
+      run: |
+        chmod +x ./scripts/generate_manifest.sh
+        ./scripts/generate_manifest.sh
+
+    - name: Sign Packages file
+      run: |
+        chmod +x ./scripts/sign_packages.sh
+        ./scripts/sign_packages.sh
 
     - name: Debug output directory
       run: |
