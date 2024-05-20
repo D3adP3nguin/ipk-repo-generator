@@ -68,3 +68,9 @@ generate_packages "$repo_dir" "$packages_file"
 # Debug: Print the contents of the Packages file
 echo "Contents of the Packages file:"
 cat "$packages_file"
+
+# Verify the Packages file is not empty
+if [ ! -s "$packages_file" ]; then
+    echo "Error: Packages file is empty or does not exist."
+    exit 1
+fi
