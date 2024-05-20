@@ -43,9 +43,14 @@ ls -l "$key_file"
 echo "Permissions of the usign binary:"
 ls -l "$usign_path"
 
-# Attempt to sign the Packages file
-"$usign_path" -S -m "$packages_file" -s "$key_file" -x "$signature_file"
-if [ $? -ne 0 ]; then
+# Attempt to sign the Packages file and capture the output
+sign_command="$usign_path -S -m $packages_file -s $key_file -x $signature_file"
+echo "Executing sign command: $sign_command"
+output=$($sign_command 2>&1)
+result=$?
+echo "Command output: $output"
+
+if [ $result -ne 0 ]; then
     echo "Error: Failed to sign the Packages file"
     exit 1
 fi
