@@ -49,6 +49,16 @@ if [ ! -x "$usign_path" ]; then
     exit 1
 fi
 
+# Ensure the Packages file is not empty
+if [ ! -s "$packages_file" ]; then
+    echo "Error: Packages file is empty or does not exist."
+    exit 1
+fi
+
+# Print the contents of the Packages file
+echo "Contents of the Packages file:"
+cat "$packages_file"
+
 # Print the contents of the key file
 echo "Contents of the key file:"
 cat "$key_file"
@@ -60,7 +70,7 @@ echo "Permissions of the usign binary:"
 ls -l "$usign_path"
 
 # Attempt to sign the Packages file and capture the output
-sign_command="$(pwd)/$usign_path -S -m $(pwd)/$packages_file -s $(pwd)/$key_file -x $(pwd)/$signature_file"
+sign_command="$usign_path -S -m $packages_file -s $key_file -x $signature_file"
 echo "Executing sign command: $sign_command"
 output=$($sign_command 2>&1)
 result=$?
