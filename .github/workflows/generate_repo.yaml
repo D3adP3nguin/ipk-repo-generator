@@ -37,13 +37,13 @@ jobs:
       run: |
         cp ./usign/build/usign ./repo/usign/build/usign
 
-    - name: Copy precompiled IPKs
-      run: |
-        cp ./IPK_files/* ./repo/IPK_files/
-
     - name: Set execute permissions for usign
       run: |
         chmod +x ./repo/usign/build/usign
+
+    - name: Copy precompiled IPKs
+      run: |
+        cp ./IPK_files/* ./repo/IPK_files/
 
     - name: Debug private key
       run: |
@@ -66,9 +66,11 @@ jobs:
         ./scripts/generate_manifest.sh
 
     - name: Sign Packages file
+      env:
+        USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh
+        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
     - name: Debug output directory
       run: |

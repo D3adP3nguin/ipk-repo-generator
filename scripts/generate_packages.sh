@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Hardcoded paths
+OUTPUT_DIR="./output"
+KEY_DIR="./keys"
+USIGN_PATH="./repo/usign/build/usign"
+
+# Ensure necessary directories exist
+mkdir -p "$OUTPUT_DIR"
+mkdir -p "$(dirname "$USIGN_PATH")"
+
 # Function to extract control file from IPK
 extract_control_from_ipk() {
     ipk_file=$1
@@ -52,17 +61,17 @@ extract_control_from_ipk() {
 
 # Function to generate Packages file
 generate_packages() {
-    repo_dir="./repo/IPK_files"
+    ipk_dir=$1
     output_file=$2
 
     echo "Generating Packages file..."
     > "$output_file" # Empty the file
 
     # Debug: List all IPK files found
-    echo "Looking for IPK files in $repo_dir"
-    find "$repo_dir" -type f -name '*.ipk'
+    echo "Looking for IPK files in $ipk_dir"
+    find "$ipk_dir" -type f -name '*.ipk'
 
-    find "$repo_dir" -type f -name '*.ipk' | while read -r ipk; do
+    find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
         echo "Processing IPK file: $ipk"
         extract_control_from_ipk "$ipk" "$output_file"
     done
@@ -74,10 +83,10 @@ generate_packages() {
 }
 
 # Main script
-repo_dir="./repo/IPK_files"
-packages_file="./output/Packages"
+ipk_dir="./repo/IPK_files"
+packages_file="$OUTPUT_DIR/Packages"
 
-generate_packages "$repo_dir" "$packages_file"
+generate_packages "$ipk_dir" "$packages_file"
 
 # Verify the Packages file is not empty
 if [ ! -s "$packages_file" ]; then
