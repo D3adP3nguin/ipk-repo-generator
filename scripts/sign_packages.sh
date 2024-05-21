@@ -5,20 +5,6 @@ sig_file=$2
 usign_key=$3
 usign_path=$4
 
-echo "Signing the Packages file..."
-echo "Packages file: $packages_file"
-echo "Signature file: $sig_file"
-echo "Usign path: $usign_path"
-echo "Current working directory: $(pwd)"
-echo "Files in current directory:"
-ls -l
-echo "Files in output directory:"
-ls -l ./output
-
-# Debug: Check the contents of the usign_key
-echo "Contents of the key file:"
-echo "$usign_key"
-
 # Create a temporary key file from the environment variable
 echo "$usign_key" > ./temp_usign_key
 

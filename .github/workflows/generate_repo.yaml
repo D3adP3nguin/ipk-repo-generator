@@ -30,7 +30,6 @@ jobs:
       run: |
         mkdir -p ./repo/IPK_files
         mkdir -p ./repo/usign/build
-        mkdir -p ./keys
         mkdir -p ./output
 
     - name: Copy precompiled usign binary
@@ -44,11 +43,6 @@ jobs:
     - name: Copy precompiled IPKs
       run: |
         find ./IPK_files -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
-
-    - name: Debug private key
-      run: |
-        echo "Contents of the private key file:"
-        cat ./keys/openWrtUsign.key
 
     - name: Generate Packages file
       run: |
@@ -71,17 +65,6 @@ jobs:
       run: |
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
-
-    - name: Debug output directory
-      run: |
-        echo "Contents of the output directory:"
-        ls -l ./output
-        echo "Contents of the Packages file:"
-        cat ./output/Packages
-        echo "Contents of the Packages.gz file:"
-        gzip -d -c ./output/Packages.gz | cat
-        echo "Contents of the Packages manifest file:"
-        cat ./output/Packages.manifest
 
     - name: Upload generated files
       uses: actions/upload-artifact@v2

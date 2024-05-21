@@ -2,7 +2,6 @@
 
 # Hardcoded paths
 OUTPUT_DIR="./output"
-KEY_DIR="./keys"
 USIGN_PATH="./repo/usign/build/usign"
 
 # Ensure necessary directories exist
@@ -15,21 +14,12 @@ extract_control_from_ipk() {
     output_file=$2
     filename=$(basename "$ipk_file")
 
-    echo "Extracting control file from $ipk_file..."
-
-    # Debug: Check the IPK file format
-    file "$ipk_file"
-
     # Decompress the IPK file (gzip compressed)
     gzip -d -c "$ipk_file" > temp.tar
     if [ $? -ne 0 ]; then
         echo "Error: Failed to decompress $ipk_file"
         exit 1
     fi
-
-    # Debug: List contents of the decompressed tar file
-    echo "Contents of temp.tar:"
-    tar -tf temp.tar
 
     # Extract control.tar.gz from the tar archive
     tar --strip-components=1 -xf temp.tar ./control.tar.gz
@@ -38,10 +28,6 @@ extract_control_from_ipk() {
         rm temp.tar
         exit 1
     fi
-
-    # Debug: List contents of control.tar.gz
-    echo "Contents of control.tar.gz:"
-    tar -tzf control.tar.gz
 
     # Extract control file from control.tar.gz
     tar -xzOf control.tar.gz ./control >> "$output_file"
@@ -64,22 +50,13 @@ generate_packages() {
     ipk_dir=$1
     output_file=$2
 
-    echo "Generating Packages file..."
     > "$output_file" # Empty the file
 
-    # Debug: List all IPK files found
-    echo "Looking for IPK files in $ipk_dir"
-    find "$ipk_dir" -type f -name '*.ipk'
-
     find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
-        echo "Processing IPK file: $ipk"
         extract_control_from_ipk "$ipk" "$output_file"
     done
 
     echo "Packages file generated at $output_file"
-    # Debug: Print the contents of the Packages file
-    echo "Contents of the Packages file after generation:"
-    cat "$output_file"
 }
 
 # Main script
