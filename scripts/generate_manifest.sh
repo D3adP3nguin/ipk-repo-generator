@@ -27,6 +27,6 @@ generate_packages_manifest() {
 
 # Main script
 ipk_dir="./repo/IPK_files"
-manifest_file="./output/Packages.manifest"
+manifest_file="$OUTPUT_DIR/Packages.manifest"
 
 generate_packages_manifest "$ipk_dir" "$manifest_file"
