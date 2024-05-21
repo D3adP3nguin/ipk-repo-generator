@@ -52,7 +52,7 @@ extract_control_from_ipk() {
 
 # Function to generate Packages file
 generate_packages() {
-    repo_dir=$1
+    repo_dir="./repo/IPK_files"
     output_file=$2
 
     echo "Generating Packages file..."

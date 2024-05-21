@@ -37,6 +37,10 @@ jobs:
       run: |
         cp ./usign/build/usign ./repo/usign/build/usign
 
+    - name: Copy precompiled IPKs
+      run: |
+        cp ./IPK_files/* ./repo/IPK_files/
+
     - name: Set execute permissions for usign
       run: |
         chmod +x ./repo/usign/build/usign
