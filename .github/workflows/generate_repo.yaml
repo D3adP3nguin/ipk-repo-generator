@@ -43,7 +43,7 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        cp ./IPK_files/* ./repo/IPK_files/
+        find ./IPK_files -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
 
     - name: Debug private key
       run: |
