@@ -13,8 +13,14 @@ jobs:
       matrix:
         path:
           - ./devices/ln6001/fw_v1.0.3.01/home
+          - ./devices/ln6001/fw_v1.0.3.01/privacyui
+          - ./devices/ln6001/fw_v1.0.3.01/enterprise
           - ./devices/ln6001/fw_v1.1.0.01/home
-          - ./devices/ln6002/fw_v1.0.1.01 /home
+          - ./devices/ln6001/fw_v1.1.0.01/privacyui
+          - ./devices/ln6001/fw_v1.1.0.01/enterprise
+          - ./devices/ln6002/fw_v1.0.1.01/home
+          - ./devices/ln6002/fw_v1.0.1.01/privacyui
+          - ./devices/ln6002/fw_v1.0.1.01/enterprise
 
     steps:
     - name: Checkout repository
@@ -90,6 +96,6 @@ jobs:
     - name: Upload generated files
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.date.outputs.date }}
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
         path: ./output/
         if-no-files-found: error
