@@ -2,11 +2,8 @@ name: Generate IPK Repository Files
 
 on:
   push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+    paths:
+      - '**.ipk'
 
 jobs:
   build:
