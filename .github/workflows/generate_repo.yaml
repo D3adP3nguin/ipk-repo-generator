@@ -23,16 +23,16 @@ jobs:
     - name: Get names
       id: name
       run: |
-        device_name=$(echo ${{ matrix.path }} | cut -d/ -f3)
-        fw_name=$(echo ${{ matrix.path }} | cut -d/ -f4)
+        device=$(echo ${{ matrix.path }} | cut -d/ -f3)
+        fw=$(echo ${{ matrix.path }} | cut -d/ -f4)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f5)
 
-        echo "device_name=$device_name"
-        echo "fw_name=$fw_name"
+        echo "device=$device"
+        echo "fw=$fw"
         echo "flavor=$flavor"
 
-        echo "device_name=${device_name}" >> $GITHUB_OUTPUT
-        echo "fw_name=${fw_name}" >> $GITHUB_OUTPUT
+        echo "device=${device}" >> $GITHUB_OUTPUT
+        echo "fw=${fw}" >> $GITHUB_OUTPUT
         echo "flavor=${flavor}" >> $GITHUB_OUTPUT
 
     - name: Set up Python
@@ -95,6 +95,6 @@ jobs:
     - name: Upload generated files
       uses: actions/upload-artifact@v4
       with:
-        name: repo-files-${{ steps.date.outputs.date }}
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.date.outputs.date }}
         path: ./output/
         if-no-files-found: error
