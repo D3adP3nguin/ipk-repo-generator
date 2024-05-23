@@ -9,10 +9,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        path:
+          - ./devices/ln6001/fw_v1.0.3.01/home
+          - ./devices/ln6001/fw_v1.1.0.01/home
+          - ./devices/ln6002/fw_v1.0.1.01 /home
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
+
+    - name: Get names
+      id: name
+      run: |
+        device_name=$(echo ${{ matrix.path }} | cut -d/ -f3)
+        fw_name=$(echo ${{ matrix.path }} | cut -d/ -f4)
+        flavor=$(echo ${{ matrix.path }} | cut -d/ -f5)
+
+        echo "device_name=$device_name"
+        echo "fw_name=$fw_name"
+        echo "flavor=$flavor"
+
+        echo "device_name=${device_name}" >> $GITHUB_OUTPUT
+        echo "fw_name=${fw_name}" >> $GITHUB_OUTPUT
+        echo "flavor=${flavor}" >> $GITHUB_OUTPUT
 
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -40,7 +61,7 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        find ./IPK_files -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
 
     - name: Generate Packages file
       run: |
