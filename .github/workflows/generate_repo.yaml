@@ -1,6 +1,7 @@
 name: Generate IPK Repository Files
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - '**.ipk'
