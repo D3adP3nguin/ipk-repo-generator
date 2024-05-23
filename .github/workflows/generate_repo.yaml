@@ -64,13 +64,16 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
-    - name: Copy IPKs to output directory
+    - name: output-date
       run: |
-        cp ./repo/IPK_files/*.ipk ./output/
+        date="$(date +'%Y-%m-%d')"
+        echo "date=$date"
+        echo "date=${date}" >> $GITHUB_OUTPUT
 
     - name: Upload generated files
       uses: actions/upload-artifact@v4
       with:
-        name: repo-files
+        name: repo-files-${{ steps.output-date.outputs.date }}
         path: ./output/
         if-no-files-found: error
+        
