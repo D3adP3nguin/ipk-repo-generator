@@ -97,5 +97,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
-        path: ./output/
+        path: |
+          ./output/
+          ./repo/IPK_files/
         if-no-files-found: error
