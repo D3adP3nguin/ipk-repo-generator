@@ -7,46 +7,22 @@ on:
       - '**.ipk'
 
 jobs:
-  set-matrix:
-    runs-on: ubuntu-latest
-    outputs:
-      matrix: ${{ steps.generate-matrix.outputs.matrix }}
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Generate matrix paths
-      id: generate-matrix
-      run: |
-        paths=$(bash ./generate_matrix_paths.sh)
-        echo "matrix=$paths" > matrix.json
-        echo "matrix=$paths" >> $GITHUB_OUTPUT
-
-    - name: Upload matrix file
-      uses: actions/upload-artifact@v2
-      with:
-        name: matrix-file
-        path: matrix.json
-
   build:
-    needs: set-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        path:
+          - devices/ln6001/fw_v1.0.3.01/enterprise
+          - devices/ln6001/fw_v1.0.3.01/home
+          - devices/ln6001/fw_v1.0.3.01/privacyui
+          - devices/ln6001/fw_v1.1.0.01/enterprise
+          - devices/ln6001/fw_v1.1.0.01/home
+          - devices/ln6001/fw_v1.1.0.01/privacyui
+          - devices/ln6002/fw_v1.0.1.01/enterprise
+          - devices/ln6002/fw_v1.0.1.01/home
+          - devices/ln6002/fw_v1.0.1.01/privacyui
+      
     steps:
-    - name: Download matrix file
-      uses: actions/download-artifact@v2
-      with:
-        name: matrix-file
-        path: .
-
-    - name: Read matrix from file
-      id: read-matrix
-      run: |
-        matrix=$(cat matrix.json)
-        echo "matrix=$matrix" >> $GITHUB_ENV
-
     - name: Checkout repository
       uses: actions/checkout@v4
 

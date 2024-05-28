@@ -4,10 +4,10 @@
 echo "Current directory: $(pwd)"
 
 # Use ls to list directories and filter them accordingly
-paths=$(ls -d ./devices/*/*/* 2>/dev/null | sed 's/^\.\///')
+paths=$(ls -d devices/*/*/* 2>/dev/null)
 
-# Convert to JSON array format
-json_paths=$(echo "$paths" | jq -R -s -c 'split("\n") | map(select(. != ""))')
-
-# Output the JSON array
-echo "$json_paths"
+# Output the paths with the required indentation
+echo "Generated paths:"
+echo "$paths" | while read -r path; do
+    echo "          - ${path}"
+done
