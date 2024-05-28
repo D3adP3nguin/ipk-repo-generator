@@ -1,6 +1,3 @@
-To ensure that the IPKs are correctly included in the output directory along with the repository dependency files for each matrix entry, you can adjust the workflow to copy the IPKs directly to the output directory corresponding to each matrix path. Here's the modified GitHub Action:
-
-```yaml
 name: Generate IPK Repository Files
 
 on:
@@ -102,9 +99,3 @@ jobs:
         name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
         path: ./output/
         if-no-files-found: error
-```
-
-In this updated workflow:
-- The `Copy precompiled IPKs` step now copies the IPK files directly to the `./output/` directory.
-- This ensures that the IPK files are included in the output along with the repository dependency files for each matrix path.
-- The `Upload generated files` step will then upload the entire contents of the `./output/` directory, which includes both the IPK files and the generated repository dependency files, as a single artifact for each matrix entry.
