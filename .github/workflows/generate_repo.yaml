@@ -44,7 +44,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gzip tar coreutils opkg-utils
+        sudo apt-get install -y gzip tar coreutils 
 
     - name: Create necessary directories
       run: |
