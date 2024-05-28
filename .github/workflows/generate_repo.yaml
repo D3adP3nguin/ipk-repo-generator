@@ -7,21 +7,27 @@ on:
       - '**.ipk'
 
 jobs:
+  set-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Generate matrix paths
+      id: set-matrix
+      run: |
+        paths=$(bash ./scripts/generate_matrix_paths.sh | jq -R -s -c 'split("\n") | map(select(. != ""))')
+        echo "matrix=$paths" >> $GITHUB_OUTPUT
+
   build:
+    needs: set-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path:
-          - ./devices/ln6001/fw_v1.0.3.01/home
-          - ./devices/ln6001/fw_v1.0.3.01/privacyui
-          - ./devices/ln6001/fw_v1.0.3.01/enterprise
-          - ./devices/ln6001/fw_v1.1.0.01/home
-          - ./devices/ln6001/fw_v1.1.0.01/privacyui
-          - ./devices/ln6001/fw_v1.1.0.01/enterprise
-          - ./devices/ln6002/fw_v1.0.1.01/home
-          - ./devices/ln6002/fw_v1.0.1.01/privacyui
-          - ./devices/ln6002/fw_v1.0.1.01/enterprise
-
+        path: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
