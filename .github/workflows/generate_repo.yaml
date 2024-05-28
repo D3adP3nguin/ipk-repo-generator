@@ -15,17 +15,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: List repository files
-      run: |
-        echo "Repository directory structure:"
-        ls -R
-
     - name: Generate matrix paths
       id: generate-matrix
       run: |
-        paths=$(bash ./scripts/generate_matrix_paths.sh)
-        echo "Matrix paths: $paths"
+        paths=$(bash ../generate_matrix_paths.sh)
         echo "matrix=$paths" >> $GITHUB_ENV
+        echo "::set-output name=matrix::$paths"
 
     - name: Debug matrix paths
       run: |
@@ -36,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path: ${{ fromJson(env.matrix) }}
+        path: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
       
     steps:
     - name: Checkout repository
@@ -45,9 +40,9 @@ jobs:
     - name: Get names
       id: name
       run: |
-        device=$(echo ${{ matrix.path }} | cut -d/ -f4)
-        fw=$(echo ${{ matrix.path }} | cut -d/ -f5)
-        flavor=$(echo ${{ matrix.path }} | cut -d/ -f6)
+        device=$(echo ${{ matrix.path }} | cut -d/ -f2)
+        fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
+        flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
 
         echo "device=$device"
         echo "fw=$fw"
