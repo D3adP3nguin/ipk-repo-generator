@@ -25,18 +25,18 @@ jobs:
       run: |
         paths=$(bash ./scripts/generate_matrix_paths.sh)
         echo "Matrix paths: $paths"
-        echo "::set-output name=matrix::$paths"
+        echo "matrix=$paths" >> $GITHUB_ENV
 
     - name: Debug matrix paths
       run: |
-        echo "Generated matrix paths: ${{ steps.generate-matrix.outputs.matrix }}"
+        echo "Generated matrix paths: ${{ env.matrix }}"
 
   build:
     needs: set-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
+        path: ${{ fromJson(env.matrix) }}
       
     steps:
     - name: Checkout repository
