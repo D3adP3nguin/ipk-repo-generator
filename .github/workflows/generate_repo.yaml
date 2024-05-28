@@ -10,15 +10,15 @@ jobs:
   set-matrix:
     runs-on: ubuntu-latest
     outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
+      matrix: ${{ steps.generate-matrix.outputs.matrix }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
 
     - name: Generate matrix paths
-      id: set-matrix
+      id: generate-matrix
       run: |
-        paths=$(bash ./scripts/generate_matrix_paths.sh | jq -R -s -c 'split("\n") | map(select(. != ""))')
+        paths=$(bash ./scripts/generate_matrix_paths.sh)
         echo "matrix=$paths" >> $GITHUB_OUTPUT
 
   build:
@@ -35,9 +35,9 @@ jobs:
     - name: Get names
       id: name
       run: |
-        device=$(echo ${{ matrix.path }} | cut -d/ -f3)
-        fw=$(echo ${{ matrix.path }} | cut -d/ -f4)
-        flavor=$(echo ${{ matrix.path }} | cut -d/ -f5)
+        device=$(echo ${{ matrix.path }} | cut -d/ -f4)
+        fw=$(echo ${{ matrix.path }} | cut -d/ -f5)
+        flavor=$(echo ${{ matrix.path }} | cut -d/ -f6)
 
         echo "device=$device"
         echo "fw=$fw"
