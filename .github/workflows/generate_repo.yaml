@@ -18,7 +18,7 @@ jobs:
     - name: Generate matrix paths
       id: generate-matrix
       run: |
-        paths=$(bash ../generate_matrix_paths.sh)
+        paths=$(bash ./generate_matrix_paths.sh)
         echo "matrix=$paths" >> $GITHUB_ENV
         echo "::set-output name=matrix::$paths"
 
