@@ -88,8 +88,8 @@ jobs:
 
     - name: Move files to root directory
       run: |
-        mv ./output/* $GITHUB_WORKSPACE/
-        mv ./repo/IPK_files/* $GITHUB_WORKSPACE/
+        mv ./output/* ${{ github.workspace }}
+        mv ./repo/IPK_files/* ${{ github.workspace }}
 
     - name: Output Date
       id: date
@@ -102,5 +102,10 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
-        path: $GITHUB_WORKSPACE/
+        path: |
+          ${{ github.workspace }}/Packages
+          ${{ github.workspace }}/Packages.gz
+          ${{ github.workspace }}/Packages.manifest
+          ${{ github.workspace }}/Packages.sig
+          ${{ github.workspace }}/*.ipk
         if-no-files-found: error
