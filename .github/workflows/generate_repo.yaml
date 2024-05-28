@@ -15,11 +15,21 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - name: List repository files
+      run: |
+        echo "Repository directory structure:"
+        ls -R
+
     - name: Generate matrix paths
       id: generate-matrix
       run: |
         paths=$(bash ./scripts/generate_matrix_paths.sh)
-        echo "matrix=$paths" >> $GITHUB_OUTPUT
+        echo "Matrix paths: $paths"
+        echo "::set-output name=matrix::$paths"
+
+    - name: Debug matrix paths
+      run: |
+        echo "Generated matrix paths: ${{ steps.generate-matrix.outputs.matrix }}"
 
   build:
     needs: set-matrix
