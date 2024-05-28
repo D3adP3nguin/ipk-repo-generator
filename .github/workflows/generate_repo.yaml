@@ -44,13 +44,13 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gzip tar coreutils
+        sudo apt-get install -y gzip tar coreutils opkg-utils
 
     - name: Create necessary directories
       run: |
         mkdir -p ./repo/IPK_files
         mkdir -p ./repo/usign/build
-        mkdir -p ./output
+        mkdir -p ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -62,7 +62,7 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/ \;
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
 
     - name: Generate Packages file
       run: |
@@ -86,6 +86,17 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
+    - name: Copy IPK files to output
+      run: |
+        cp ./repo/IPK_files/*.ipk ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}/
+
+    - name: Move repository files to output
+      run: |
+        mv ./output/Packages ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}/
+        mv ./output/Packages.gz ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}/
+        mv ./output/Packages.manifest ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}/
+        mv ./output/Packages.sig ./output/${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}/
+
     - name: Output Date
       id: date
       run: |
@@ -93,9 +104,13 @@ jobs:
         echo "date=$date"
         echo "date=${date}" >> $GITHUB_OUTPUT
 
-    - name: Upload generated files
+    - name: Create a ZIP file with all artifacts
+      run: |
+        zip -r Master-Repo-${{ steps.date.outputs.date }}.zip ./output
+
+    - name: Upload the ZIP file
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
-        path: ./output/
+        name: Master-Repo-${{ steps.date.outputs.date }}
+        path: Master-Repo-${{ steps.date.outputs.date }}.zip
         if-no-files-found: error
