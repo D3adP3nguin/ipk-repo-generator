@@ -19,21 +19,34 @@ jobs:
       id: generate-matrix
       run: |
         paths=$(bash ./generate_matrix_paths.sh)
-        echo "matrix=$paths" >> $GITHUB_ENV
+        echo "matrix=$paths" > matrix.json
         echo "matrix=$paths" >> $GITHUB_OUTPUT
 
-    - name: Debug matrix paths
-      run: |
-        echo "Generated matrix paths: ${{ env.matrix }}"
+    - name: Upload matrix file
+      uses: actions/upload-artifact@v2
+      with:
+        name: matrix-file
+        path: matrix.json
 
   build:
     needs: set-matrix
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        path: ${{ fromJson(env.matrix) }}
-      
+        path: ${{ fromJson(needs.set-matrix.outputs.matrix) }}
     steps:
+    - name: Download matrix file
+      uses: actions/download-artifact@v2
+      with:
+        name: matrix-file
+        path: .
+
+    - name: Read matrix from file
+      id: read-matrix
+      run: |
+        matrix=$(cat matrix.json)
+        echo "matrix=$matrix" >> $GITHUB_ENV
+
     - name: Checkout repository
       uses: actions/checkout@v4
 
