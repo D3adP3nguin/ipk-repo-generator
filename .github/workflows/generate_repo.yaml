@@ -86,6 +86,11 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
+    - name: Move files to root directory
+      run: |
+        mv ./output/* $GITHUB_WORKSPACE/
+        mv ./repo/IPK_files/* $GITHUB_WORKSPACE/
+
     - name: Output Date
       id: date
       run: |
@@ -97,7 +102,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
-        path: |
-          ./output/
-          ./repo/IPK_files/
+        path: $GITHUB_WORKSPACE/
         if-no-files-found: error
