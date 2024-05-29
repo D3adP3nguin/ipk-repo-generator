@@ -75,7 +75,7 @@ jobs:
           echo "exists=false" >> $GITHUB_ENV
         fi
 
-    - name: Debug: Check S3 existence status
+    - name: Debug - Check S3 existence status
       run: |
         echo "S3 directory existence check result: ${{ env.exists }}"
 
