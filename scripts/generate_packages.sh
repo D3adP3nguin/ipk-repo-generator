@@ -43,9 +43,9 @@ extract_control_from_ipk() {
 
     # Add the tag to the Description field
     if [ "$category" == "curated" ]; then
-        tag="[Linksys Curated]"
+        tag="[Linksys curated]"
     elif [ "$category" == "supported" ]; then
-        tag="[Linksys Supported]"
+        tag="[Linksys supported]"
     else
         tag=""
     fi
@@ -82,8 +82,8 @@ generate_packages() {
 }
 
 # Main script
-ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
-packages_file="$ipk_dir/Packages"
+ipk_dir="./output/${device}/${fw}/${flavor}"
+packages_file="${ipk_dir}/Packages"
 category=$1
 
 generate_packages "$ipk_dir" "$packages_file" "$category"
