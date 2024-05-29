@@ -30,6 +30,18 @@ jobs:
           - devices/ln6002/fw_v1.0.1.01/home/supported
           - devices/ln6002/fw_v1.0.1.01/privacyui/curated
           - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+          - devices/ln6002/test_fw/enterprise/curated
+          - devices/ln6002/test_fw/enterprise/supported
+          - devices/ln6002/test_fw/home/curated
+          - devices/ln6002/test_fw/home/supported
+          - devices/ln6002/test_fw/privacyui/curated
+          - devices/ln6002/test_fw/privacyui/supported
+          - devices/ln6002/test_fw_2/enterprise/curated
+          - devices/ln6002/test_fw_2/enterprise/supported
+          - devices/ln6002/test_fw_2/home/curated
+          - devices/ln6002/test_fw_2/home/supported
+          - devices/ln6002/test_fw_2/privacyui/curated
+          - devices/ln6002/test_fw_2/privacyui/supported
 
     steps:
     - name: Checkout repository
