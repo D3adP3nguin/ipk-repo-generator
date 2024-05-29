@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Signing Packages file"
+
 # Usage: ./sign_packages.sh <packages_file> <output_signature_file> <usign_private_key> <usign_binary_path>
 
 packages_file=$1

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Generating Packages file"
+
 # Hardcoded paths
 OUTPUT_DIR="./output"
 USIGN_PATH="./repo/usign/build/usign"
@@ -13,6 +15,8 @@ extract_control_from_ipk() {
     ipk_file=$1
     output_file=$2
     filename=$(basename "$ipk_file")
+
+    echo "Extracting control file from $ipk_file"
 
     # Extract the control.tar.gz from the IPK
     tar -xOf "$ipk_file" ./control.tar.gz > control.tar.gz

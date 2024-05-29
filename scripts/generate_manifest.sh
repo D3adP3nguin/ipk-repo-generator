@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo "Generating Packages.manifest"
+
 # Function to generate Packages.manifest
 generate_packages_manifest() {
     ipk_dir=$1
