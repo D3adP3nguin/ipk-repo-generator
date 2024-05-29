@@ -14,18 +14,11 @@ extract_control_from_ipk() {
     output_file=$2
     filename=$(basename "$ipk_file")
 
-    # Decompress the IPK file (gzip compressed)
-    gzip -d -c "$ipk_file" > temp.tar
-    if [ $? -ne 0 ]; then
-        echo "Error: Failed to decompress $ipk_file"
-        exit 1
-    fi
-
-    # Extract control.tar.gz from the tar archive
-    tar --strip-components=1 -xf temp.tar ./control.tar.gz
+    # Extract the control.tar.gz from the IPK
+    tar -xOf "$ipk_file" ./control.tar.gz > control.tar.gz
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control.tar.gz from $ipk_file"
-        rm temp.tar
+        rm control.tar.gz
         exit 1
     fi
 
@@ -33,7 +26,7 @@ extract_control_from_ipk() {
     tar -xzOf control.tar.gz ./control >> "$output_file"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control file from control.tar.gz"
-        rm temp.tar control.tar.gz
+        rm control.tar.gz
         exit 1
     fi
 
@@ -41,7 +34,7 @@ extract_control_from_ipk() {
     echo "Filename: $filename" >> "$output_file"
 
     # Cleanup temporary files
-    rm temp.tar control.tar.gz
+    rm control.tar.gz
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
