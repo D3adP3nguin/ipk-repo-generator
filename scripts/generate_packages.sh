@@ -3,6 +3,7 @@
 # Hardcoded paths
 OUTPUT_DIR="./output"
 USIGN_PATH="./repo/usign/build/usign"
+CATEGORY=$1
 
 # Ensure necessary directories exist
 mkdir -p "$OUTPUT_DIR"
@@ -12,6 +13,7 @@ mkdir -p "$(dirname "$USIGN_PATH")"
 extract_control_from_ipk() {
     ipk_file=$1
     output_file=$2
+    category=$3
     filename=$(basename "$ipk_file")
 
     # Decompress the IPK file (gzip compressed)
@@ -30,18 +32,26 @@ extract_control_from_ipk() {
     fi
 
     # Extract control file from control.tar.gz
-    tar -xzOf control.tar.gz ./control >> "$output_file"
+    tar -xzOf control.tar.gz ./control > control
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control file from control.tar.gz"
         rm temp.tar control.tar.gz
         exit 1
     fi
 
+    # Add category tag to the Description field
+    if [ -n "$category" ]; then
+        sed -i "s/^Description:/Description: [$category] /" control
+    fi
+
+    # Append control file content to the output file
+    cat control >> "$output_file"
+
     # Add Filename field
     echo "Filename: $filename" >> "$output_file"
 
     # Cleanup temporary files
-    rm temp.tar control.tar.gz
+    rm temp.tar control.tar.gz control
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
@@ -49,11 +59,12 @@ extract_control_from_ipk() {
 generate_packages() {
     ipk_dir=$1
     output_file=$2
+    category=$3
 
     > "$output_file" # Empty the file
 
     find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
-        extract_control_from_ipk "$ipk" "$output_file"
+        extract_control_from_ipk "$ipk" "$output_file" "$category"
     done
 
     echo "Packages file generated at $output_file"
@@ -62,8 +73,9 @@ generate_packages() {
 # Main script
 ipk_dir="./repo/IPK_files"
 packages_file="$OUTPUT_DIR/Packages"
+category="$1"
 
-generate_packages "$ipk_dir" "$packages_file"
+generate_packages "$ipk_dir" "$packages_file" "$category"
 
 # Verify the Packages file is not empty
 if [ ! -s "$packages_file" ]; then

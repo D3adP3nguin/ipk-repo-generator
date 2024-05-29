@@ -79,7 +79,7 @@ jobs:
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh
+        ./scripts/generate_packages.sh ${{ steps.name.outputs.category }}
 
     - name: Compress Packages file
       run: |
