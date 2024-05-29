@@ -52,10 +52,12 @@ jobs:
     - name: Copy precompiled usign binary
       run: |
         cp ./usign/build/usign ./output/usign
+        echo "Copied usign binary"
 
     - name: Set execute permissions for usign
       run: |
         chmod +x ./output/usign
+        echo "Set execute permissions for usign"
 
     - name: Copy precompiled IPKs
       run: |
@@ -78,15 +80,17 @@ jobs:
         echo "Contents of Packages.gz file:"
         gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.gz
 
-      - name: Generate Packages manifest
-        run: |
-          chmod +x ./scripts/generate_manifest.sh
-          ./scripts/generate_manifest.sh
-        env:
-          device: ${{ env.device }}
-          fw: ${{ env.fw }}
-          flavor: ${{ env.flavor }}
-    category: ${{ env.category }}
+    - name: Generate Packages manifest
+      run: |
+        chmod +x ./scripts/generate_manifest.sh
+        ./scripts/generate_manifest.sh
+        echo "Contents of Packages.manifest file:"
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+      env:
+        device: ${{ env.device }}
+        fw: ${{ env.fw }}
+        flavor: ${{ env.flavor }}
+        category: ${{ env.category }}
 
     - name: Sign Packages file
       env:
@@ -98,8 +102,8 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.date }}
+        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/**
 
   upload-to-s3:
     needs: build
