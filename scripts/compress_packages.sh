@@ -1,5 +1,10 @@
 #!/bin/bash
 
+device="${device}"
+fw="${fw}"
+flavor="${flavor}"
+category="${category}"
+
 packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
 compressed_file="${packages_file}.gz"
 
@@ -16,3 +21,5 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Packages.gz file generated at $compressed_file"
+echo "Contents of Packages.gz file:"
+gunzip -c "$compressed_file"
