@@ -82,7 +82,7 @@ generate_packages() {
 }
 
 # Main script
-ipk_dir="./output"
+ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
 packages_file="$OUTPUT_DIR/Packages"
 category=$1
 
