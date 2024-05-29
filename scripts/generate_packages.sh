@@ -27,18 +27,23 @@ extract_control_from_ipk() {
     tar -tzf control.tar.gz
 
     # Extract control file from control.tar.gz
-    tar -xzOf control.tar.gz ./control >> "$output_file"
+    tar --extract --file=control.tar.gz --to-stdout ./control > control
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control file from control.tar.gz"
         rm control.tar.gz
+        rm control
         exit 1
     fi
+
+    # Append control file content to the output file
+    cat control >> "$output_file"
 
     # Add Filename field
     echo "Filename: $filename" >> "$output_file"
 
     # Cleanup temporary files
     rm control.tar.gz
+    rm control
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
