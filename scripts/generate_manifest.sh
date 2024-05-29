@@ -26,6 +26,10 @@ generate_packages_manifest() {
 }
 
 # Main script
+device=${device}
+fw=${fw}
+flavor=${flavor}
+category=${category}
 ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
 manifest_file="$ipk_dir/Packages.manifest"
 
