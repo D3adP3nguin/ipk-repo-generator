@@ -14,6 +14,8 @@ extract_control_from_ipk() {
     output_file=$2
     filename=$(basename "$ipk_file")
 
+    echo "Processing IPK file: $ipk_file"
+
     # Decompress the IPK file (gzip compressed)
     gzip -d -c "$ipk_file" > temp.tar
     if [ $? -ne 0 ]; then
@@ -51,6 +53,8 @@ generate_packages() {
     output_file=$2
 
     > "$output_file" # Empty the file
+
+    echo "Looking for IPK files in directory: $ipk_dir"
 
     find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
         extract_control_from_ipk "$ipk" "$output_file"
