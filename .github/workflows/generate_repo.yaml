@@ -42,19 +42,16 @@ jobs:
         fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
         category=$(echo ${{ matrix.path }} | cut -d/ -f5)
-        date=$(date +'%Y-%m-%d')
 
         echo "device=$device"
         echo "fw=$fw"
         echo "flavor=$flavor"
         echo "category=$category"
-        echo "date=$date"
 
-        echo "device=${device}" >> $GITHUB_ENV
-        echo "fw=${fw}" >> $GITHUB_ENV
-        echo "flavor=${flavor}" >> $GITHUB_ENV
-        echo "category=${category}" >> $GITHUB_ENV
-        echo "date=${date}" >> $GITHUB_ENV
+        echo "device=${device}" >> $GITHUB_OUTPUT
+        echo "fw=${fw}" >> $GITHUB_OUTPUT
+        echo "flavor=${flavor}" >> $GITHUB_OUTPUT
+        echo "category=${category}" >> $GITHUB_OUTPUT
 
     - name: Install dependencies
       run: |
@@ -63,24 +60,26 @@ jobs:
 
     - name: Create necessary directories
       run: |
+        mkdir -p ./repo/IPK_files
+        mkdir -p ./repo/usign/build
         mkdir -p ./output
 
     - name: Copy precompiled usign binary
       run: |
-        cp ./usign/build/usign ./output/usign
+        cp ./usign/build/usign ./repo/usign/build/usign
 
     - name: Set execute permissions for usign
       run: |
-        chmod +x ./output/usign
+        chmod +x ./repo/usign/build/usign
 
     - name: Copy precompiled IPKs
       run: |
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/ \;
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
 
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh ${{ env.category }}
+        ./scripts/generate_packages.sh ${{ steps.name.outputs.category }}
 
     - name: Compress Packages file
       run: |
@@ -97,13 +96,15 @@ jobs:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
+        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/*
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
+        path: |
+          ./output/*
+          ./repo/IPK_files/*
 
   collect-and-upload:
     needs: build
@@ -117,24 +118,17 @@ jobs:
       with:
         path: ./artifacts
 
-    - name: Organize artifacts
-      run: |
-        mkdir -p ./final_repo
-        for artifact in ./artifacts/*; do
-          cp -r "$artifact"/* ./final_repo/
-        done
-
     - name: Upload to S3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        aws s3 cp ./final_repo/ s3://wrtrepo-out-test/ --recursive --sse AES256
+        aws s3 cp ./artifacts/ s3://wrtrepo-out-test/ --recursive --sse AES256
 
     - name: Create master ZIP file
       run: |
-        zip -r master_repo.zip ./final_repo
+        zip -r master_repo.zip ./artifacts
 
     - name: Upload master ZIP file
       uses: actions/upload-artifact@v4
