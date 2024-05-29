@@ -63,7 +63,7 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -75,10 +75,10 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/ \;
-        echo "IPK files in ./output/:"
-        ls -l ./output/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       run: |
@@ -100,15 +100,15 @@ jobs:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
+        ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/*
+        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
 
-  upload-to-s3:
+  collect-and-upload:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -120,14 +120,29 @@ jobs:
       with:
         path: ./artifacts
 
-    - name: Organize and upload to S3
+    - name: Organize artifacts into master_repo
+      run: |
+        mkdir -p master_repo/artifacts
+        for artifact in ./artifacts/*; do
+          cp -r "$artifact" master_repo/artifacts/
+        done
+        echo "Contents of master_repo/artifacts:"
+        ls -R master_repo/artifacts
+
+    - name: Create master ZIP file
+      run: |
+        zip -r master_repo.zip master_repo
+
+    - name: Upload master ZIP file
+      uses: actions/upload-artifact@v4
+      with:
+        name: master_repo
+        path: master_repo.zip
+
+    - name: Upload to S3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        for artifact in ./artifacts/*; do
-          dest_path="s3://wrtrepo-out-test/${artifact##*/}"
-          echo "Uploading $artifact to $dest_path"
-          aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
-        done
+        aws s3 cp ./master_repo/artifacts/ s3://wrtrepo-out-test/ --recursive --sse AES256

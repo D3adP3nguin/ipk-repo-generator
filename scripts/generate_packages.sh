@@ -12,6 +12,7 @@ mkdir -p "$(dirname "$USIGN_PATH")"
 extract_control_from_ipk() {
     ipk_file=$1
     output_file=$2
+    category=$3
     filename=$(basename "$ipk_file")
 
     echo "Processing IPK file: $ipk_file"
@@ -32,18 +33,34 @@ extract_control_from_ipk() {
     fi
 
     # Extract control file from control.tar.gz
-    tar -xzOf control.tar.gz ./control >> "$output_file"
+    control_file=$(mktemp)
+    tar -xzOf control.tar.gz ./control > "$control_file"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control file from control.tar.gz"
         rm temp.tar control.tar.gz
         exit 1
     fi
 
+    # Add the tag to the Description field
+    if [ "$category" == "curated" ]; then
+        tag="[Linksys curated]"
+    elif [ "$category" == "supported" ]; then
+        tag="[Linksys supported]"
+    else
+        tag=""
+    fi
+
+    if [ -n "$tag" ]; then
+        sed -i "s/^Description:/Description: $tag /" "$control_file"
+    fi
+
+    cat "$control_file" >> "$output_file"
+
     # Add Filename field
     echo "Filename: $filename" >> "$output_file"
 
     # Cleanup temporary files
-    rm temp.tar control.tar.gz
+    rm temp.tar control.tar.gz "$control_file"
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
@@ -51,13 +68,14 @@ extract_control_from_ipk() {
 generate_packages() {
     ipk_dir=$1
     output_file=$2
+    category=$3
 
     > "$output_file" # Empty the file
 
     echo "Looking for IPK files in directory: $ipk_dir"
 
     find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
-        extract_control_from_ipk "$ipk" "$output_file"
+        extract_control_from_ipk "$ipk" "$output_file" "$category"
     done
 
     echo "Packages file generated at $output_file"
@@ -66,8 +84,9 @@ generate_packages() {
 # Main script
 ipk_dir="./output"
 packages_file="$OUTPUT_DIR/Packages"
+category=$1
 
-generate_packages "$ipk_dir" "$packages_file"
+generate_packages "$ipk_dir" "$packages_file" "$category"
 
 # Verify the Packages file is not empty
 if [ ! -s "$packages_file" ]; then
