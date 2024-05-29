@@ -2,7 +2,7 @@
 
 # Hardcoded paths
 OUTPUT_DIR="./output"
-USIGN_PATH="./repo/usign/build/usign"
+USIGN_PATH="./output/usign"
 
 # Ensure necessary directories exist
 mkdir -p "$OUTPUT_DIR"

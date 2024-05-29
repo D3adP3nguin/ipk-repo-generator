@@ -108,7 +108,7 @@ jobs:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
         path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
 
-  collect-and-upload:
+  upload-to-s3:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -120,29 +120,14 @@ jobs:
       with:
         path: ./artifacts
 
-    - name: Organize artifacts into master_repo
-      run: |
-        mkdir -p master_repo/artifacts
-        for artifact in ./artifacts/*; do
-          cp -r "$artifact" master_repo/artifacts/
-        done
-        echo "Contents of master_repo/artifacts:"
-        ls -R master_repo/artifacts
-
-    - name: Create master ZIP file
-      run: |
-        zip -r master_repo.zip master_repo
-
-    - name: Upload master ZIP file
-      uses: actions/upload-artifact@v4
-      with:
-        name: master_repo
-        path: master_repo.zip
-
-    - name: Upload to S3
+    - name: Organize and upload to S3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        aws s3 cp ./master_repo/artifacts/ s3://wrtrepo-out-test/ --recursive --sse AES256
+        for artifact in ./artifacts/*; do
+          dest_path="s3://wrtrepo-out-test/${artifact##*/}"
+          echo "Uploading $artifact to $dest_path"
+          aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
+        done
