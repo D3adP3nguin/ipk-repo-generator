@@ -38,7 +38,7 @@ jobs:
         echo "flavor=${flavor}" >> $GITHUB_OUTPUT
         echo "category=${category}" >> $GITHUB_OUTPUT
 
-    - name: Debugging: Print path variables
+    - name: Debugging -  Print path variables
       run: |
         echo "Matrix path: ${{ matrix.path }}"
         echo "Device: ${{ steps.name.outputs.device }}"
@@ -66,7 +66,7 @@ jobs:
       run: |
         chmod +x ./repo/usign/build/usign
 
-    - name: Debugging: Check directory structure
+    - name: Debugging -  Check directory structure
       run: |
         echo "Listing current directory:"
         ls -R
@@ -80,7 +80,7 @@ jobs:
           find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
         fi
 
-    - name: Debugging: List copied IPK files
+    - name: Debugging -  List copied IPK files
       run: |
         echo "Listing IPK files in ./repo/IPK_files:"
         ls -l ./repo/IPK_files
