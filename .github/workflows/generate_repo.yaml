@@ -13,7 +13,8 @@ jobs:
       matrix:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
-
+          - devices/ln6001/fw_v1.0.3.01/enterprise/supported
+          - devices/ln6001/fw_v1.0.3.01/home/curated
 
     steps:
     - name: Checkout repository
@@ -47,26 +48,24 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./repo/IPK_files
-        mkdir -p ./repo/usign/build
         mkdir -p ./output
 
     - name: Copy precompiled usign binary
       run: |
-        cp ./usign/build/usign ./repo/usign/build/usign
+        cp ./usign/build/usign ./output/usign
 
     - name: Set execute permissions for usign
       run: |
-        chmod +x ./repo/usign/build/usign
+        chmod +x ./output/usign
 
     - name: Copy precompiled IPKs
       run: |
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/ \;
 
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh ${{ category }}
+        ./scripts/generate_packages.sh ${{ env.category }}
 
     - name: Compress Packages file
       run: |
@@ -83,15 +82,13 @@ jobs:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
+        ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: |
-          ./output/*
-          ./repo/IPK_files/*
+        path: ./output/*
 
   collect-and-upload:
     needs: build
@@ -109,8 +106,7 @@ jobs:
       run: |
         mkdir -p ./final_repo
         for artifact in ./artifacts/*; do
-          mkdir -p ./final_repo/$(basename "$artifact")
-          cp -r "$artifact"/* ./final_repo/$(basename "$artifact")/
+          cp -r "$artifact"/* ./final_repo/
         done
 
     - name: Upload to S3
