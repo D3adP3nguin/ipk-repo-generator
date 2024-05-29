@@ -66,8 +66,8 @@ jobs:
     - name: Create necessary directories
       if: env.exists == 'false'
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}
-        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}"
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
 
     - name: Copy precompiled usign binary
       if: env.exists == 'false'
@@ -84,10 +84,10 @@ jobs:
     - name: Copy precompiled IPKs
       if: env.exists == 'false'
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/:"
-        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       if: env.exists == 'false'
