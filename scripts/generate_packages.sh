@@ -42,3 +42,28 @@ extract_control_from_ipk() {
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
+# Function to generate Packages file
+generate_packages() {
+    ipk_dir=$1
+    output_file=$2
+
+    > "$output_file" # Empty the file
+
+    find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
+        extract_control_from_ipk "$ipk" "$output_file"
+    done
+
+    echo "Packages file generated at $output_file"
+}
+
+# Main script
+ipk_dir="./repo/IPK_files"
+packages_file="$OUTPUT_DIR/Packages"
+
+generate_packages "$ipk_dir" "$packages_file"
+
+# Verify the Packages file is not empty
+if [ ! -s "$packages_file" ]; then
+    echo "Error: Packages file is empty or does not exist."
+    exit 1
+fi

@@ -1,13 +1,6 @@
 #!/bin/bash
 
-# Function to generate Packages.gz
-generate_packages_gz() {
-    packages_file=$1
-    gzip -c "$packages_file" > "$packages_file.gz"
-    echo "Packages.gz file generated at $packages_file.gz"
-}
+# Compress the Packages file
+gzip -k -f ./output/Packages
 
-# Main script
-packages_file="./output/Packages"
-
-generate_packages_gz "$packages_file"
+echo "Packages file compressed to Packages.gz"
