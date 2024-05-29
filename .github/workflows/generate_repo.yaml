@@ -56,7 +56,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gzip tar coreutils
+        sudo apt-get install -y gzip tar coreutils zip
 
     - name: Create necessary directories
       run: |
@@ -110,7 +110,7 @@ jobs:
         echo "date=$date"
         echo "date=${date}" >> $GITHUB_OUTPUT
 
-    - name: Upload generated files
+    - name: Upload individual generated files
       uses: actions/upload-artifact@v4
       with:
         name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
@@ -121,3 +121,15 @@ jobs:
           ${{ github.workspace }}/Packages.sig
           ${{ github.workspace }}/*.ipk
         if-no-files-found: error
+
+    - name: Create master ZIP file
+      run: |
+        mkdir -p master_repo
+        mv ${{ github.workspace }}/* master_repo/
+        zip -r master_repo.zip master_repo
+
+    - name: Upload master ZIP file
+      uses: actions/upload-artifact@v4
+      with:
+        name: master_repo
+        path: master_repo.zip
