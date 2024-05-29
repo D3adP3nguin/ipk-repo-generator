@@ -14,7 +14,7 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/curated
+
 
     steps:
     - name: Checkout repository
@@ -122,3 +122,17 @@ jobs:
           echo "Uploading $artifact to $dest_path"
           aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
         done
+
+    - name: Create master ZIP file
+      run: |
+        mkdir -p master_repo/artifacts
+        cp -r ./artifacts/* master_repo/artifacts/
+        zip -r master_repo.zip master_repo
+        echo "Contents of master_repo:"
+        ls -R master_repo
+
+    - name: Upload master ZIP file
+      uses: actions/upload-artifact@v4
+      with:
+        name: master_repo
+        path: master_repo.zip

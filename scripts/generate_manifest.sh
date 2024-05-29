@@ -26,7 +26,7 @@ generate_packages_manifest() {
 }
 
 # Main script
-ipk_dir="./repo/IPK_files"
-manifest_file="./output/Packages.manifest"
+ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
+manifest_file="$ipk_dir/Packages.manifest"
 
 generate_packages_manifest "$ipk_dir" "$manifest_file"
