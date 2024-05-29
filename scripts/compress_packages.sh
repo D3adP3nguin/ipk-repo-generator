@@ -1,13 +1,20 @@
 #!/bin/bash
 
-# Function to generate Packages.gz
-generate_packages_gz() {
-    packages_file=$1
-    gzip -c "$packages_file" > "$packages_file.gz"
-    echo "Packages.gz file generated at $packages_file.gz"
-}
+# Path to the Packages file
+PACKAGES_FILE="./output/${device}/${fw}/${flavor}/${category}/Packages"
 
-# Main script
-packages_file="./output/Packages"
+# Check if the Packages file exists
+if [ ! -f "$PACKAGES_FILE" ]; then
+    echo "Error: Packages file $PACKAGES_FILE does not exist."
+    exit 1
+fi
 
-generate_packages_gz "$packages_file"
+# Compress the Packages file
+gzip -c "$PACKAGES_FILE" > "$PACKAGES_FILE.gz"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Failed to compress the Packages file."
+    exit 1
+fi
+
+echo "Packages.gz file generated at $PACKAGES_FILE.gz"
