@@ -2,7 +2,7 @@
 
 # Hardcoded paths
 OUTPUT_DIR="./output"
-USIGN_PATH="./repo/usign/build/usign"
+USIGN_PATH="./output/usign"
 
 # Ensure necessary directories exist
 mkdir -p "$OUTPUT_DIR"
@@ -60,7 +60,7 @@ generate_packages() {
 }
 
 # Main script
-ipk_dir="./repo/IPK_files"
+ipk_dir="./output"
 packages_file="$OUTPUT_DIR/Packages"
 
 generate_packages "$ipk_dir" "$packages_file"
