@@ -14,22 +14,6 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/curated
-          - devices/ln6001/fw_v1.0.3.01/home/supported
-          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
-          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
-          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
-          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
-          - devices/ln6001/fw_v1.1.0.01/home/curated
-          - devices/ln6001/fw_v1.1.0.01/home/supported
-          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
-          - devices/ln6001/fw_v1.1.0.01/privacyui/supported
-          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
-          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
-          - devices/ln6002/fw_v1.0.1.01/home/curated
-          - devices/ln6002/fw_v1.0.1.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
-          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
 
     steps:
     - name: Checkout repository
@@ -84,16 +68,22 @@ jobs:
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
+        echo "Contents of Packages file:"
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
       run: |
         chmod +x ./scripts/compress_packages.sh
         ./scripts/compress_packages.sh
+        echo "Contents of Packages.gz file:"
+        gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.gz
 
     - name: Generate Packages manifest
       run: |
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
+        echo "Contents of Packages.manifest file:"
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
 
     - name: Sign Packages file
       env:
