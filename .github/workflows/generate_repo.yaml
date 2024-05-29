@@ -65,7 +65,7 @@ jobs:
       id: check_s3
       run: |
         bucket_name="wrtrepo-out-test"
-        dir_to_check="${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
+        dir_to_check="${{ env.device }}/${{ env.fw }}/${{ env.flavor }}"
         
         if aws s3 ls "s3://$bucket_name/$dir_to_check/"; then
           echo "Directory exists in S3: $dir_to_check"
@@ -82,8 +82,8 @@ jobs:
     - name: Create necessary directories
       if: env.exists == 'false'
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
-        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}
+        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}"
 
     - name: Copy precompiled usign binary
       if: env.exists == 'false'
@@ -100,10 +100,10 @@ jobs:
     - name: Copy precompiled IPKs
       if: env.exists == 'false'
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
-        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/:"
+        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/
 
     - name: Generate Packages file
       if: env.exists == 'false'
@@ -111,7 +111,7 @@ jobs:
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
         echo "Contents of Packages file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/Packages
 
     - name: Compress Packages file
       if: env.exists == 'false'
@@ -119,7 +119,7 @@ jobs:
         chmod +x ./scripts/compress_packages.sh
         ./scripts/compress_packages.sh
         echo "Contents of Packages.gz file:"
-        gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.gz
+        gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/Packages.gz
 
     - name: Generate Packages manifest
       if: env.exists == 'false'
@@ -127,7 +127,7 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/Packages.manifest
 
     - name: Sign Packages file
       if: env.exists == 'false'
@@ -135,14 +135,14 @@ jobs:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
+        ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
 
     - name: Upload individual artifacts
       if: env.exists == 'false'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/**
 
   upload-to-s3:
     needs: build
@@ -163,7 +163,9 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
         for artifact in ./artifacts/*; do
-          dest_path="s3://wrtrepo-out-test/${artifact##*/}"
+          # Extract only the relevant part of the path
+          path_in_s3=$(basename $artifact)
+          dest_path="s3://wrtrepo-out-test/${path_in_s3%-${{ env.date }}*}"
           echo "Uploading $artifact to $dest_path"
           aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
         done
