@@ -30,7 +30,7 @@ jobs:
           - devices/ln6002/fw_v1.0.1.01/home/supported
           - devices/ln6002/fw_v1.0.1.01/privacyui/curated
           - devices/ln6002/fw_v1.0.1.01/privacyui/supported
-      
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -98,34 +98,14 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
-    - name: Move files to root directory
+    - name: Move files to a temporary directory
       run: |
-        mv ./output/* ${{ github.workspace }}
-        mv ./repo/IPK_files/* ${{ github.workspace }}
-
-    - name: Output Date
-      id: date
-      run: |
-        date="$(date +'%Y-%m-%d')"
-        echo "date=$date"
-        echo "date=${date}" >> $GITHUB_OUTPUT
-
-    - name: Upload individual generated files
-      uses: actions/upload-artifact@v4
-      with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
-        path: |
-          ${{ github.workspace }}/Packages
-          ${{ github.workspace }}/Packages.gz
-          ${{ github.workspace }}/Packages.manifest
-          ${{ github.workspace }}/Packages.sig
-          ${{ github.workspace }}/*.ipk
-        if-no-files-found: error
+        mkdir -p master_repo
+        mv ./output/* master_repo/
+        mv ./repo/IPK_files/* master_repo/
 
     - name: Create master ZIP file
       run: |
-        mkdir -p master_repo
-        mv ${{ github.workspace }}/* master_repo/
         zip -r master_repo.zip master_repo
 
     - name: Upload master ZIP file
