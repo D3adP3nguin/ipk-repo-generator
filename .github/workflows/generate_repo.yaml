@@ -1,4 +1,4 @@
-name: Generate IPK Repository Files
+name: Generate IPK Repository Files and Upload to S3
 
 on:
   workflow_dispatch:
@@ -56,7 +56,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y gzip tar coreutils zip
+        sudo apt-get install -y gzip tar coreutils zip awscli
 
     - name: Create necessary directories
       run: |
@@ -98,14 +98,30 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
-    - name: Move files to a temporary directory
-      run: |
-        mkdir -p master_repo
-        mv ./output/* master_repo/
-        mv ./repo/IPK_files/* master_repo/
+    - name: Upload individual artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
+        path: |
+          ./output/*
+          ./repo/IPK_files/*
+
+  collect-and-upload:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: ./artifacts
 
     - name: Create master ZIP file
       run: |
+        mkdir -p master_repo
+        mv ./artifacts/* master_repo/
         zip -r master_repo.zip master_repo
 
     - name: Upload master ZIP file
@@ -113,3 +129,5 @@ jobs:
       with:
         name: master_repo
         path: master_repo.zip
+
+
