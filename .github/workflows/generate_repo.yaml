@@ -109,7 +109,7 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
-    - name: Debugging: List output files
+    - name: Debugging List output files
       run: |
         ls -l ./output
         cat ./output/Packages
