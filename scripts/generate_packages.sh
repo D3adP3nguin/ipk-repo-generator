@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo "Generating Packages file"
-
 # Hardcoded paths
 OUTPUT_DIR="./output"
 USIGN_PATH="./repo/usign/build/usign"
@@ -16,38 +14,34 @@ extract_control_from_ipk() {
     output_file=$2
     filename=$(basename "$ipk_file")
 
-    echo "Extracting control file from $ipk_file"
+    # Decompress the IPK file (gzip compressed)
+    gzip -d -c "$ipk_file" > temp.tar
+    if [ $? -ne 0 ]; then
+        echo "Error: Failed to decompress $ipk_file"
+        exit 1
+    fi
 
-    # Extract the control.tar.gz from the IPK
-    tar -xOf "$ipk_file" ./control.tar.gz > control.tar.gz
+    # Extract control.tar.gz from the tar archive
+    tar --strip-components=1 -xf temp.tar ./control.tar.gz
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control.tar.gz from $ipk_file"
-        rm control.tar.gz
+        rm temp.tar
         exit 1
     fi
-
-    # List the contents of control.tar.gz for debugging
-    echo "Contents of control.tar.gz:"
-    tar -tzf control.tar.gz
 
     # Extract control file from control.tar.gz
-    tar --extract --file=control.tar.gz --to-stdout ./control > control
+    tar -xzOf control.tar.gz ./control >> "$output_file"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to extract control file from control.tar.gz"
-        rm control.tar.gz
-        rm control
+        rm temp.tar control.tar.gz
         exit 1
     fi
-
-    # Append control file content to the output file
-    cat control >> "$output_file"
 
     # Add Filename field
     echo "Filename: $filename" >> "$output_file"
 
     # Cleanup temporary files
-    rm control.tar.gz
-    rm control
+    rm temp.tar control.tar.gz
     echo "" >> "$output_file" # Add an empty line between entries
 }
 

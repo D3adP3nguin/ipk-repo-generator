@@ -15,7 +15,22 @@ jobs:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
           - devices/ln6001/fw_v1.0.3.01/home/curated
-
+          - devices/ln6001/fw_v1.0.3.01/home/supported
+          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
+          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
+          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
+          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
+          - devices/ln6001/fw_v1.1.0.01/home/curated
+          - devices/ln6001/fw_v1.1.0.01/home/supported
+          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
+          - devices/ln6001/fw_v1.1.0.01/privacyui/supported
+          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
+          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
+          - devices/ln6002/fw_v1.0.1.01/home/curated
+          - devices/ln6002/fw_v1.0.1.01/home/supported
+          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
+          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+      
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -26,25 +41,14 @@ jobs:
         device=$(echo ${{ matrix.path }} | cut -d/ -f2)
         fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
-        category=$(echo ${{ matrix.path }} | cut -d/ -f5 || echo "base")
 
         echo "device=$device"
         echo "fw=$fw"
         echo "flavor=$flavor"
-        echo "category=$category"
 
         echo "device=${device}" >> $GITHUB_OUTPUT
         echo "fw=${fw}" >> $GITHUB_OUTPUT
         echo "flavor=${flavor}" >> $GITHUB_OUTPUT
-        echo "category=${category}" >> $GITHUB_OUTPUT
-
-    - name: Debugging -  Print path variables
-      run: |
-        echo "Matrix path: ${{ matrix.path }}"
-        echo "Device: ${{ steps.name.outputs.device }}"
-        echo "Firmware: ${{ steps.name.outputs.fw }}"
-        echo "Flavor: ${{ steps.name.outputs.flavor }}"
-        echo "Category: ${{ steps.name.outputs.category }}"
 
     - name: Install dependencies
       run: |
@@ -56,7 +60,6 @@ jobs:
         mkdir -p ./repo/IPK_files
         mkdir -p ./repo/usign/build
         mkdir -p ./output
-        mkdir -p ./temp
 
     - name: Copy precompiled usign binary
       run: |
@@ -66,64 +69,22 @@ jobs:
       run: |
         chmod +x ./repo/usign/build/usign
 
-    - name: Debugging -  Check directory structure
-      run: |
-        echo "Listing current directory:"
-        ls -R
-
     - name: Copy precompiled IPKs
       run: |
-        echo "Copying IPK files from ${{ matrix.path }}"
-        if [ "${{ steps.name.outputs.category }}" = "base" ]; then
-          find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
-        else
-          find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
-        fi
-
-    - name: Debugging -  List copied IPK files
-      run: |
-        echo "Listing IPK files in ./repo/IPK_files:"
-        ls -l ./repo/IPK_files
-
-    - name: Add tags to package descriptions
-      run: |
-        for file in ./repo/IPK_files/*.ipk; do
-          echo "Processing file: $file"
-          mkdir -p ./temp/ipk_contents
-          tar -xzf "$file" -C ./temp/ipk_contents
-          tar -xzf ./temp/ipk_contents/control.tar.gz -C ./temp/ipk_contents
-          control_file=./temp/ipk_contents/control
-          if [ "${{ steps.name.outputs.category }}" = "curated" ]; then
-            tag="[Linksys curated]"
-          elif [ "${{ steps.name.outputs.category }}" = "supported" ]; then
-            tag="[Linksys supported]"
-          else
-            tag=""
-          fi
-          if [ -n "$tag" ]; then
-            echo "Adding tag: $tag to $control_file"
-            sed -i "s/^Description:/Description: $tag /" "$control_file"
-          fi
-          tar -czf ./temp/ipk_contents/control.tar.gz -C ./temp/ipk_contents control
-          tar -czf "$file" -C ./temp/ipk_contents .
-          rm -rf ./temp/ipk_contents
-        done
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
 
     - name: Generate Packages file
       run: |
-        echo "Running generate_packages.sh script"
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh
 
     - name: Compress Packages file
       run: |
-        echo "Running compress_packages.sh script"
         chmod +x ./scripts/compress_packages.sh
         ./scripts/compress_packages.sh
 
     - name: Generate Packages manifest
       run: |
-        echo "Running generate_manifest.sh script"
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
 
@@ -131,20 +92,11 @@ jobs:
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
-        echo "Running sign_packages.sh script"
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh ./output/Packages ./output/Packages.sig "$USIGN_PRIVATE_KEY" ./repo/usign/build/usign
 
-    - name: Debugging - List output files
-      run: |
-        echo "Listing files in ./output:"
-        ls -l ./output
-        echo "Contents of ./output/Packages:"
-        cat ./output/Packages
-
     - name: Move files to root directory
       run: |
-        echo "Moving files to root directory"
         mv ./output/* ${{ github.workspace }}
         mv ./repo/IPK_files/* ${{ github.workspace }}
 
@@ -158,7 +110,7 @@ jobs:
     - name: Upload generated files
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
         path: |
           ${{ github.workspace }}/Packages
           ${{ github.workspace }}/Packages.gz

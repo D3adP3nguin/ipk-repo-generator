@@ -1,12 +1,13 @@
 #!/bin/bash
 
-echo "Compressing the Packages file"
-# Compress the Packages file
-gzip -k -f ./output/Packages
+# Function to generate Packages.gz
+generate_packages_gz() {
+    packages_file=$1
+    gzip -c "$packages_file" > "$packages_file.gz"
+    echo "Packages.gz file generated at $packages_file.gz"
+}
 
-if [ $? -eq 0 ]; then
-    echo "Packages file compressed to Packages.gz"
-else
-    echo "Error: Failed to compress Packages file"
-    exit 1
-fi
+# Main script
+packages_file="./output/Packages"
+
+generate_packages_gz "$packages_file"
