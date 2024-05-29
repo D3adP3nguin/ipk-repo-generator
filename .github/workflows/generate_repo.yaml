@@ -41,14 +41,17 @@ jobs:
         device=$(echo ${{ matrix.path }} | cut -d/ -f2)
         fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
+        category=$(echo ${{ matrix.path }} | cut -d/ -f5)
 
         echo "device=$device"
         echo "fw=$fw"
         echo "flavor=$flavor"
+        echo "category=$category"
 
         echo "device=${device}" >> $GITHUB_OUTPUT
         echo "fw=${fw}" >> $GITHUB_OUTPUT
         echo "flavor=${flavor}" >> $GITHUB_OUTPUT
+        echo "category=${category}" >> $GITHUB_OUTPUT
 
     - name: Install dependencies
       run: |
@@ -110,7 +113,7 @@ jobs:
     - name: Upload generated files
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}--${{ steps.date.outputs.date }}
+        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
         path: |
           ${{ github.workspace }}/Packages
           ${{ github.workspace }}/Packages.gz
