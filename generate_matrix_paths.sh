@@ -4,7 +4,7 @@
 echo "Current directory: $(pwd)"
 
 # Use ls to list directories and filter them accordingly
-paths=$(ls -d devices/*/*/* 2>/dev/null)
+paths=$(ls -d devices/*/*/*/* 2>/dev/null)
 
 # Output the paths with the required indentation
 echo "Generated paths:"
