@@ -12,23 +12,16 @@ jobs:
     strategy:
       matrix:
         path:
-          - devices/ln6001/fw_v1.0.3.01/enterprise/curated
-          - devices/ln6001/fw_v1.0.3.01/home/curated
-          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
-          - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/supported
-          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
-          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
+          - devices/ln6001/fw_v1.0.3.01/enterprise
+          - devices/ln6001/fw_v1.0.3.01/home
+          - devices/ln6001/fw_v1.0.3.01/privacyui
+          - devices/ln6001/fw_v1.1.0.01/enterprise
           - devices/ln6001/fw_v1.1.0.01/home/curated
-          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
-          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
           - devices/ln6001/fw_v1.1.0.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
-          - devices/ln6002/fw_v1.0.1.01/home/curated
-          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
-          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
-          - devices/ln6002/fw_v1.0.1.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+          - devices/ln6001/fw_v1.1.0.01/privacyui
+          - devices/ln6002/fw_v1.0.1.01/enterprise
+          - devices/ln6002/fw_v1.0.1.01/home
+          - devices/ln6002/fw_v1.0.1.01/privacyui
 
     steps:
     - name: Checkout repository
@@ -40,7 +33,7 @@ jobs:
         device=$(echo ${{ matrix.path }} | cut -d/ -f2)
         fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
-        category=$(echo ${{ matrix.path }} | cut -d/ -f5)
+        category=$(echo ${{ matrix.path }} | cut -d/ -f5 || echo "base")
 
         echo "device=$device"
         echo "fw=$fw"
@@ -74,7 +67,11 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+        if [ "${{ steps.name.outputs.category }}" = "base" ]; then
+          find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+        else
+          find ${{ matrix.path }}/${{ steps.name.outputs.category }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+        fi
 
     - name: Add tags to package descriptions
       run: |
@@ -84,10 +81,14 @@ jobs:
           control_file=./temp/ipk_contents/control
           if [ "${{ steps.name.outputs.category }}" = "curated" ]; then
             tag="[Linksys curated]"
-          else
+          elif [ "${{ steps.name.outputs.category }}" = "supported" ]; then
             tag="[Linksys supported]"
+          else
+            tag=""
           fi
-          sed -i "s/^Description:/Description: $tag /" "$control_file"
+          if [ -n "$tag" ]; then
+            sed -i "s/^Description:/Description: $tag /" "$control_file"
+          fi
           tar -czf "$file" -C ./temp/ipk_contents .
           rm -rf ./temp/ipk_contents
         done
