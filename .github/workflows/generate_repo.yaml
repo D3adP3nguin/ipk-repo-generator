@@ -13,6 +13,7 @@ jobs:
       matrix:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
+          - devices/ln6001/fw_v1.0.3.01/enterprise/supported
 
     steps:
     - name: Checkout repository
@@ -61,7 +62,7 @@ jobs:
         if [ "${{ steps.name.outputs.category }}" = "base" ]; then
           find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
         else
-          find ${{ matrix.path }}/${{ steps.name.outputs.category }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
+          find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./repo/IPK_files/ \;
         fi
 
     - name: Add tags to package descriptions
