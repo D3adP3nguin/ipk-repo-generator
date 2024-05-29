@@ -30,18 +30,6 @@ jobs:
           - devices/ln6002/fw_v1.0.1.01/home/supported
           - devices/ln6002/fw_v1.0.1.01/privacyui/curated
           - devices/ln6002/fw_v1.0.1.01/privacyui/supported
-          - devices/ln6002/test_fw/enterprise/curated
-          - devices/ln6002/test_fw/enterprise/supported
-          - devices/ln6002/test_fw/home/curated
-          - devices/ln6002/test_fw/home/supported
-          - devices/ln6002/test_fw/privacyui/curated
-          - devices/ln6002/test_fw/privacyui/supported
-          - devices/ln6002/test_fw_2/enterprise/curated
-          - devices/ln6002/test_fw_2/enterprise/supported
-          - devices/ln6002/test_fw_2/home/curated
-          - devices/ln6002/test_fw_2/home/supported
-          - devices/ln6002/test_fw_2/privacyui/curated
-          - devices/ln6002/test_fw_2/privacyui/supported
 
     steps:
     - name: Checkout repository
@@ -73,52 +61,30 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gzip tar coreutils zip awscli
 
-    - name: Check if directory exists in S3
-      id: check_s3
+    - name: List existing IPKs in S3
+      id: list_s3
       run: |
         bucket_name="wrtrepo-out-test"
         dir_to_check="${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
-        
-        if aws s3 ls "s3://$bucket_name/$dir_to_check/"; then
-          echo "Directory exists in S3: $dir_to_check"
-          echo "exists=true" >> $GITHUB_ENV
-        else
-          echo "Directory does not exist in S3: $dir_to_check"
-          echo "exists=false" >> $GITHUB_ENV
-        fi
+        existing_ipks=$(aws s3 ls s3://$bucket_name/$dir_to_check/ --recursive | awk '{print $4}')
+        echo "existing_ipks=$existing_ipks" >> $GITHUB_ENV
 
-    - name: Debug - Check S3 existence status
-      run: |
-        echo "S3 directory existence check result: ${{ env.exists }}"
-
-    - name: Create necessary directories
-      if: env.exists == 'false'
+    - name: Compare and Copy new IPKs
+      id: compare_ipks
       run: |
         mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
-        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
-
-    - name: Copy precompiled usign binary
-      if: env.exists == 'false'
-      run: |
-        cp ./usign/build/usign ./output/usign
-        echo "Copied usign binary"
-
-    - name: Set execute permissions for usign
-      if: env.exists == 'false'
-      run: |
-        chmod +x ./output/usign
-        echo "Set execute permissions for usign"
-
-    - name: Copy precompiled IPKs
-      if: env.exists == 'false'
-      run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
-        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+        for ipk in $(find ${{ matrix.path }} -type f -name '*.ipk'); do
+          ipk_name=$(basename $ipk)
+          if ! echo "${{ env.existing_ipks }}" | grep -q "$dir_to_check/$ipk_name"; then
+            cp $ipk ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+            echo "New IPK copied: $ipk_name"
+          else
+            echo "IPK already exists in S3: $ipk_name"
+          fi
+        done
 
     - name: Generate Packages file
-      if: env.exists == 'false'
+      if: always()
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
@@ -126,7 +92,7 @@ jobs:
         cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
-      if: env.exists == 'false'
+      if: always()
       run: |
         chmod +x ./scripts/compress_packages.sh
         ./scripts/compress_packages.sh
@@ -134,7 +100,7 @@ jobs:
         gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.gz
 
     - name: Generate Packages manifest
-      if: env.exists == 'false'
+      if: always()
       run: |
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
@@ -142,7 +108,7 @@ jobs:
         cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
 
     - name: Sign Packages file
-      if: env.exists == 'false'
+      if: always()
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
@@ -150,7 +116,7 @@ jobs:
         ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
 
     - name: Upload individual artifacts
-      if: env.exists == 'false'
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
