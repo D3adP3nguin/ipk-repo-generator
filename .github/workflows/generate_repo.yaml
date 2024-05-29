@@ -36,6 +36,12 @@ jobs:
           - devices/ln6002/test_fw/home/supported
           - devices/ln6002/test_fw/privacyui/curated
           - devices/ln6002/test_fw/privacyui/supported
+          - devices/ln6002/test_fw_2/enterprise/curated
+          - devices/ln6002/test_fw_2/enterprise/supported
+          - devices/ln6002/test_fw_2/home/curated
+          - devices/ln6002/test_fw_2/home/supported
+          - devices/ln6002/test_fw_2/privacyui/curated
+          - devices/ln6002/test_fw_2/privacyui/supported
 
     steps:
     - name: Checkout repository
@@ -81,20 +87,27 @@ jobs:
           echo "exists=false" >> $GITHUB_ENV
         fi
 
+    - name: Debug: Check S3 existence status
+      run: |
+        echo "S3 directory existence check result: ${{ env.exists }}"
+
     - name: Create necessary directories
       if: env.exists == 'false'
       run: |
         mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        echo "Created directories for ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
 
     - name: Copy precompiled usign binary
       if: env.exists == 'false'
       run: |
         cp ./usign/build/usign ./output/usign
+        echo "Copied usign binary"
 
     - name: Set execute permissions for usign
       if: env.exists == 'false'
       run: |
         chmod +x ./output/usign
+        echo "Set execute permissions for usign"
 
     - name: Copy precompiled IPKs
       if: env.exists == 'false'
