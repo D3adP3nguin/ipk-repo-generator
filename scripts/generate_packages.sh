@@ -43,9 +43,9 @@ extract_control_from_ipk() {
 
     # Add the tag to the Description field
     if [ "$category" == "curated" ]; then
-        tag="[Linksys curated]"
+        tag="[Linksys Curated]"
     elif [ "$category" == "supported" ]; then
-        tag="[Linksys supported]"
+        tag="[Linksys Supported]"
     else
         tag=""
     fi

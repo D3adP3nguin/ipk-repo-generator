@@ -30,6 +30,12 @@ jobs:
           - devices/ln6002/fw_v1.0.1.01/home/supported
           - devices/ln6002/fw_v1.0.1.01/privacyui/curated
           - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+          - devices/ln6002/test_fw/enterprise/curated
+          - devices/ln6002/test_fw/enterprise/supported
+          - devices/ln6002/test_fw/home/curated
+          - devices/ln6002/test_fw/home/supported
+          - devices/ln6002/test_fw/privacyui/curated
+          - devices/ln6002/test_fw/privacyui/supported
 
     steps:
     - name: Checkout repository
@@ -61,19 +67,37 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gzip tar coreutils zip awscli
 
+    - name: Check if directory exists in S3
+      id: check_s3
+      run: |
+        bucket_name="wrtrepo-out-test"
+        dir_to_check="${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}"
+        
+        if aws s3 ls "s3://$bucket_name/$dir_to_check/"; then
+          echo "Directory exists in S3: $dir_to_check"
+          echo "exists=true" >> $GITHUB_ENV
+        else
+          echo "Directory does not exist in S3: $dir_to_check"
+          echo "exists=false" >> $GITHUB_ENV
+        fi
+
     - name: Create necessary directories
+      if: env.exists == 'false'
       run: |
         mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
+      if: env.exists == 'false'
       run: |
         cp ./usign/build/usign ./output/usign
 
     - name: Set execute permissions for usign
+      if: env.exists == 'false'
       run: |
         chmod +x ./output/usign
 
     - name: Copy precompiled IPKs
+      if: env.exists == 'false'
       run: |
         echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
         find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
@@ -81,6 +105,7 @@ jobs:
         ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
+      if: env.exists == 'false'
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
@@ -88,6 +113,7 @@ jobs:
         cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
+      if: env.exists == 'false'
       run: |
         chmod +x ./scripts/compress_packages.sh
         ./scripts/compress_packages.sh
@@ -95,6 +121,7 @@ jobs:
         gunzip -c ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.gz
 
     - name: Generate Packages manifest
+      if: env.exists == 'false'
       run: |
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
@@ -102,6 +129,7 @@ jobs:
         cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
 
     - name: Sign Packages file
+      if: env.exists == 'false'
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
       run: |
@@ -109,6 +137,7 @@ jobs:
         ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
 
     - name: Upload individual artifacts
+      if: env.exists == 'false'
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
