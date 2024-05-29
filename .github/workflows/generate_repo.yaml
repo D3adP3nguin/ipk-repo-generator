@@ -42,16 +42,19 @@ jobs:
         fw=$(echo ${{ matrix.path }} | cut -d/ -f3)
         flavor=$(echo ${{ matrix.path }} | cut -d/ -f4)
         category=$(echo ${{ matrix.path }} | cut -d/ -f5)
+        date=$(date +'%Y-%m-%d')
 
         echo "device=$device"
         echo "fw=$fw"
         echo "flavor=$flavor"
         echo "category=$category"
+        echo "date=$date"
 
-        echo "device=${device}" >> $GITHUB_OUTPUT
-        echo "fw=${fw}" >> $GITHUB_OUTPUT
-        echo "flavor=${flavor}" >> $GITHUB_OUTPUT
-        echo "category=${category}" >> $GITHUB_OUTPUT
+        echo "device=${device}" >> $GITHUB_ENV
+        echo "fw=${fw}" >> $GITHUB_ENV
+        echo "flavor=${flavor}" >> $GITHUB_ENV
+        echo "category=${category}" >> $GITHUB_ENV
+        echo "date=${date}" >> $GITHUB_ENV
 
     - name: Install dependencies
       run: |
@@ -79,7 +82,7 @@ jobs:
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh ${{ steps.name.outputs.category }}
+        ./scripts/generate_packages.sh ${{ category }}
 
     - name: Compress Packages file
       run: |
@@ -101,7 +104,7 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.name.outputs.device }}-${{ steps.name.outputs.fw }}-${{ steps.name.outputs.flavor }}-${{ steps.name.outputs.category }}--${{ steps.date.outputs.date }}
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
         path: |
           ./output/*
           ./repo/IPK_files/*
@@ -118,17 +121,25 @@ jobs:
       with:
         path: ./artifacts
 
+    - name: Organize artifacts
+      run: |
+        mkdir -p ./final_repo
+        for artifact in ./artifacts/*; do
+          mkdir -p ./final_repo/$(basename "$artifact")
+          cp -r "$artifact"/* ./final_repo/$(basename "$artifact")/
+        done
+
     - name: Upload to S3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        aws s3 cp ./artifacts/ s3://wrtrepo-out-test/ --recursive --sse AES256
+        aws s3 cp ./final_repo/ s3://wrtrepo-out-test/ --recursive --sse AES256
 
     - name: Create master ZIP file
       run: |
-        zip -r master_repo.zip ./artifacts
+        zip -r master_repo.zip ./final_repo
 
     - name: Upload master ZIP file
       uses: actions/upload-artifact@v4
