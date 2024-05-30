@@ -144,14 +144,20 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        mkdir -p organized_artifacts
+        mkdir -p master
         for file in $(find ./artifacts -type f -name '*.zip'); do
-          dir=$(echo $file | sed 's/\(.*\)-.*-.*-.*-.*\.zip/\1/' | tr '-' '/')
-          new_path="organized_artifacts/$dir"
+          base_name=$(basename $file)
+          device=$(echo $base_name | cut -d- -f1)
+          fw=$(echo $base_name | cut -d- -f2)
+          flavor=$(echo $base_name | cut -d- -f3)
+          category=$(echo $base_name | cut -d- -f4)
+          date=$(echo $base_name | cut -d- -f5 | sed 's/\.zip//')
+          
+          new_path="master/$device/$fw/$flavor/$category"
           mkdir -p $new_path
-          mv $file $new_path/
+          mv $file $new_path/${category}.zip
         done
-        aws s3 sync organized_artifacts s3://wrtrepo-out-test
+        aws s3 sync master s3://wrtrepo-out-test
 
     - name: Create master ZIP file
       run: |
