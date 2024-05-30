@@ -88,13 +88,9 @@ jobs:
     - name: Sign Packages file
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
-        device: ${{ env.device }}
-        fw: ${{ env.fw }}
-        flavor: ${{ env.flavor }}
-        category: ${{ env.category }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh
+        ./scripts/sign_packages.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
 
     - name: Prepare files for zipping
       run: |
