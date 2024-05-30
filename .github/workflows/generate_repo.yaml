@@ -125,11 +125,8 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        for artifact in ./artifacts/*; do
-          dest_path="s3://wrtrepo-out-test/${artifact##*/}"
-          echo "Uploading $artifact to $dest_path"
-          aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
-        done
+        chmod +x ./scripts/upload_to_s3.sh
+        ./scripts/upload_to_s3.sh
 
     - name: Create master ZIP file
       run: |
