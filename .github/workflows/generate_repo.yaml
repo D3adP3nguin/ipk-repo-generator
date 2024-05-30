@@ -48,7 +48,7 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        mkdir -p ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -62,17 +62,17 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        ls -l ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
         echo "Contents of Packages file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
+        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
       run: |
@@ -84,7 +84,7 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
       env:
         device: ${{ env.device }}
         fw: ${{ env.fw }}
@@ -102,22 +102,16 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh
 
-    - name: Prepare files for zipping
+    - name: Prepare files for uploading
       run: |
-        mkdir -p ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
-        cp -r ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
-
-    - name: Zip files
-      run: |
-        cd ./to_zip
-        zip -r ../${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip *
-        cd ..
+        mkdir -p ./to_upload/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        cp -r ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_upload/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
-        path: ./${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip
+        path: ./to_upload/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
         if-no-files-found: warn
         compression-level: 6
         overwrite: false
@@ -141,7 +135,7 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
         mkdir -p master
-        for file in $(find ./artifacts -type f -name '*.zip'); do
+        for file in $(find ./artifacts -type f); do
           base_name=$(basename $file)
           device=$(echo $base_name | cut -d- -f1)
           fw=$(echo $base_name | cut -d- -f2 | sed 's/fw_//')
@@ -151,7 +145,7 @@ jobs:
 
           new_path="master/$device/fw_$fw/$flavor/$category"
           mkdir -p $new_path
-          mv $file $new_path/${category}.zip
+          unzip -d $new_path $file
         done
         aws s3 sync master s3://wrtrepo-out-test
 
