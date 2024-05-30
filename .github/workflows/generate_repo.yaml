@@ -47,7 +47,8 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/curated
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/supported
 
     - name: Copy precompiled usign binary
       run: |
@@ -83,7 +84,8 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/curated/Packages.manifest
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/supported/Packages.manifest
       env:
         device: ${{ env.device }}
         fw: ${{ env.fw }}
@@ -104,8 +106,8 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}--${{ env.date }}
+        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/**
 
   upload-to-s3:
     needs: build

@@ -26,11 +26,11 @@ generate_packages_manifest() {
 }
 
 # Main script
-device=${device}
-fw=${fw}
-flavor=${flavor}
-category=${category}
-ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
-manifest_file="$ipk_dir/Packages.manifest"
+curated_ipk_dir="./output/${device}/${fw}/${flavor}/curated"
+supported_ipk_dir="./output/${device}/${fw}/${flavor}/supported"
 
-generate_packages_manifest "$ipk_dir" "$manifest_file"
+curated_manifest_file="$curated_ipk_dir/Packages.manifest"
+supported_manifest_file="$supported_ipk_dir/Packages.manifest"
+
+generate_packages_manifest "$curated_ipk_dir" "$curated_manifest_file"
+generate_packages_manifest "$supported_ipk_dir" "$supported_manifest_file"
