@@ -5,7 +5,7 @@ fw="${fw}"
 flavor="${flavor}"
 category="${category}"
 
-packages_file="./output/${device}/fw_${fw}/${flavor}/${category}/Packages"
+packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
 compressed_file="${packages_file}.gz"
 
 if [ ! -f "$packages_file" ]; then
