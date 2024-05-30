@@ -14,22 +14,7 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/curated
-          - devices/ln6001/fw_v1.0.3.01/home/supported
-          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
-          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
-          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
-          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
-          - devices/ln6001/fw_v1.1.0.01/home/curated
-          - devices/ln6001/fw_v1.1.0.01/home/supported
-          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
-          - devices/ln6001/fw_v1.1.0.01/privacyui/supported
-          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
-          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
-          - devices/ln6002/fw_v1.0.1.01/home/curated
-          - devices/ln6002/fw_v1.0.1.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
-          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+          # Add other paths as needed
 
     steps:
     - name: Checkout repository
@@ -63,7 +48,7 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        mkdir -p ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -77,17 +62,17 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
-        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        ls -l ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.category }}
         echo "Contents of Packages file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
+        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
       run: |
@@ -99,7 +84,7 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
       env:
         device: ${{ env.device }}
         fw: ${{ env.fw }}
@@ -117,11 +102,25 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh
 
+    - name: Prepare files for zipping
+      run: |
+        mkdir -p ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        cp -r ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+
+    - name: Zip files
+      run: |
+        cd ./to_zip
+        zip -r ../${{ env.device }}.zip *
+        cd ..
+
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        name: ${{ env.device }}-${{ env.date }}
+        path: ./${{ env.device }}.zip
+        if-no-files-found: warn
+        compression-level: 6
+        overwrite: false
 
   upload-to-s3:
     needs: build
@@ -141,13 +140,18 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        chmod +x ./scripts/upload_to_s3.sh
-        ./scripts/upload_to_s3.sh
+        mkdir -p master
+        for file in $(find ./artifacts -type f -name '*.zip'); do
+          base_name=$(basename $file)
+          device=$(echo $base_name | cut -d- -f1)
+          unzip -d master/$device $file
+        done
+        aws s3 sync master s3://wrtrepo-out-test
 
     - name: Create master ZIP file
       run: |
-        mkdir -p master_repo/artifacts
-        cp -r ./artifacts/* master_repo/artifacts/
+        mkdir -p master_repo
+        cp -r master/* master_repo/
         zip -r master_repo.zip master_repo
         echo "Contents of master_repo:"
         ls -R master_repo
