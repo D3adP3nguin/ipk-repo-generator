@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Read environment variables from GitHub Actions
-packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
+packages_file="./output/${device}/fw_${fw}/${flavor}/${category}/Packages"
 sig_file="${packages_file}.sig"
 usign_key="${USIGN_PRIVATE_KEY}"
 usign_path="./output/usign"
