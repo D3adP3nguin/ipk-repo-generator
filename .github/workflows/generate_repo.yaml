@@ -15,6 +15,7 @@ jobs:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
 
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
@@ -101,11 +102,22 @@ jobs:
         chmod +x ./scripts/sign_packages.sh
         ./scripts/sign_packages.sh
 
+    - name: Prepare files for zipping
+      run: |
+        mkdir -p ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        cp -r ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+
+    - name: Zip files
+      run: |
+        cd ./to_zip
+        zip -r ../${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip *
+        cd ..
+
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        name: ${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
+        path: ./${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip
         if-no-files-found: warn
         compression-level: 6
         overwrite: false
