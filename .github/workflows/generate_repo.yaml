@@ -79,7 +79,7 @@ jobs:
       run: |
         echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
         find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
         ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
@@ -120,7 +120,7 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
+        name: ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
         path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
 
   upload-to-s3:
@@ -141,8 +141,14 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        chmod +x ./scripts/upload_to_s3.sh
-        ./scripts/upload_to_s3.sh
+        mkdir -p organized_artifacts
+        find ./artifacts -type f -name '*.zip' | while read file; do
+          dir=$(basename $(dirname $(dirname $(dirname $file))))
+          new_path="organized_artifacts/$dir/$(basename $(dirname $(dirname $file)))/$(basename $(dirname $file))"
+          mkdir -p $new_path
+          mv $file $new_path/$(basename $(dirname $file)).zip
+        done
+        aws s3 sync organized_artifacts s3://wrtrepo-out-test
 
     - name: Create master ZIP file
       run: |
