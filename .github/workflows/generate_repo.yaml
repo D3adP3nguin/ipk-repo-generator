@@ -47,8 +47,7 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/curated
-        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/supported
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -84,8 +83,7 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/curated/Packages.manifest
-        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/supported/Packages.manifest
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
       env:
         device: ${{ env.device }}
         fw: ${{ env.fw }}
@@ -106,10 +104,10 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}--${{ env.date }}
-        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/**
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}--${{ env.date }}
+        path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
 
-  organize-upload-to-s3:
+  upload-to-s3:
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -121,32 +119,19 @@ jobs:
       with:
         path: ./artifacts
 
-    - name: Organize directories
-      run: |
-        for artifact in ./artifacts/*; do
-          base_name=$(echo $artifact | sed 's/-curated--[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}//;s/-supported--[0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}//')
-          if [ ! -d "combined/$base_name" ]; then
-            mkdir -p "combined/$base_name"
-          fi
-          cp -r $artifact/* "combined/$base_name/"
-        done
-
-    - name: Upload to S3
+    - name: Organize and upload to S3
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
-        for dir in combined/*; do
-          dest_path="s3://wrtrepo-out-test/${dir##*/}"
-          echo "Uploading $dir to $dest_path"
-          aws s3 cp "$dir" "$dest_path" --recursive --sse AES256
-        done
+        chmod +x ./scripts/upload_to_s3.sh
+        ./scripts/upload_to_s3.sh
 
     - name: Create master ZIP file
       run: |
         mkdir -p master_repo/artifacts
-        cp -r ./combined/* master_repo/artifacts/
+        cp -r ./artifacts/* master_repo/artifacts/
         zip -r master_repo.zip master_repo
         echo "Contents of master_repo:"
         ls -R master_repo
