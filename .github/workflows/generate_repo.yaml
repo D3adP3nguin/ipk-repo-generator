@@ -120,8 +120,11 @@ jobs:
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
         path: ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/**
+        if-no-files-found: warn
+        compression-level: 6
+        overwrite: false
 
   upload-to-s3:
     needs: build
@@ -142,11 +145,11 @@ jobs:
         AWS_REGION: ${{ secrets.AWS_REGION }}
       run: |
         mkdir -p organized_artifacts
-        find ./artifacts -type f -name '*.zip' | while read file; do
-          dir=$(basename $(dirname $(dirname $(dirname $file))))
-          new_path="organized_artifacts/$dir/$(basename $(dirname $(dirname $file)))/$(basename $(dirname $file))"
+        for file in $(find ./artifacts -type f -name '*.zip'); do
+          dir=$(echo $file | sed 's/\(.*\)-.*-.*-.*-.*\.zip/\1/' | tr '-' '/')
+          new_path="organized_artifacts/$dir"
           mkdir -p $new_path
-          mv $file $new_path/$(basename $(dirname $file)).zip
+          mv $file $new_path/
         done
         aws s3 sync organized_artifacts s3://wrtrepo-out-test
 
