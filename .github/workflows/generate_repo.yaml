@@ -141,7 +141,7 @@ jobs:
 
           new_path="master/$device/fw_$fw/$flavor/$category"
           mkdir -p $new_path
-          unzip -d $new_path $file
+          unzip -j -d $new_path $file
         done
         aws s3 sync master s3://wrtrepo-out-test
 
