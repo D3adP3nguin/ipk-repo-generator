@@ -45,10 +45,26 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y gzip tar coreutils zip awscli
 
-    - name: Setup repository
+    - name: Create necessary directories
       run: |
-        chmod +x ./scripts/repo_setup.sh
-        ./scripts/repo_setup.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+
+    - name: Copy precompiled usign binary
+      run: |
+        cp ./usign/build/usign ./output/usign
+        echo "Copied usign binary"
+
+    - name: Set execute permissions for usign
+      run: |
+        chmod +x ./output/usign
+        echo "Set execute permissions for usign"
+
+    - name: Copy precompiled IPKs
+      run: |
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       run: |
@@ -77,9 +93,13 @@ jobs:
     - name: Sign Packages file
       env:
         USIGN_PRIVATE_KEY: ${{ secrets.USIGN_PRIVATE_KEY }}
+        device: ${{ env.device }}
+        fw: ${{ env.fw }}
+        flavor: ${{ env.flavor }}
+        category: ${{ env.category }}
       run: |
         chmod +x ./scripts/sign_packages.sh
-        ./scripts/sign_packages.sh ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.sig "$USIGN_PRIVATE_KEY" ./output/usign
+        ./scripts/sign_packages.sh
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4

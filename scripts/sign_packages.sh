@@ -1,9 +1,10 @@
 #!/bin/bash
 
-packages_file=$1
-sig_file=$2
-usign_key=$3
-usign_path=$4
+# Read environment variables from GitHub Actions
+packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
+sig_file="${packages_file}.sig"
+usign_key="${USIGN_PRIVATE_KEY}"
+usign_path="./output/usign"
 
 # Create a temporary key file from the environment variable
 temp_usign_key=$(mktemp)
