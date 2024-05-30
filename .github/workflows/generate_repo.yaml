@@ -82,7 +82,7 @@ jobs:
     - name: Generate Packages manifest
       run: |
         chmod +x ./scripts/generate_manifest.sh
-        ./scripts/generate_manifest.sh
+        ./scripts.generate_manifest.sh
         echo "Contents of Packages.manifest file:"
         cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
       env:
@@ -145,7 +145,7 @@ jobs:
 
           new_path="master/$device/fw_$fw/$flavor/$category"
           mkdir -p $new_path
-          unzip -d $new_path $file
+          mv $file $new_path
         done
         aws s3 sync master s3://wrtrepo-out-test
 
