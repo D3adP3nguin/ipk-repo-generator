@@ -76,19 +76,14 @@ jobs:
     - name: Compress Packages file
       run: |
         chmod +x ./scripts/compress_packages.sh
-        ./scripts/compress_packages.sh
+        ./scripts/compress_packages.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
 
     - name: Generate Packages manifest
       run: |
         chmod +x ./scripts/generate_manifest.sh
-        ./scripts/generate_manifest.sh
+        ./scripts/generate_manifest.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
         echo "Contents of Packages.manifest file:"
         cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
-      env:
-        device: ${{ env.device }}
-        fw: ${{ env.fw }}
-        flavor: ${{ env.flavor }}
-        category: ${{ env.category }}
 
     - name: Sign Packages file
       env:
@@ -150,7 +145,7 @@ jobs:
 
           new_path="master/$device/fw_$fw/$flavor/$category"
           mkdir -p $new_path
-          mv $file $new_path
+          unzip -d $new_path $file
         done
         aws s3 sync master s3://wrtrepo-out-test
 

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-device="${device}"
-fw="${fw}"
-flavor="${flavor}"
-category="${category}"
+device=$1
+fw=$2
+flavor=$3
+category=$4
 
-packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
+packages_file="./output/${device}/fw_${fw}/${flavor}/${category}/Packages"
 compressed_file="${packages_file}.gz"
 
 if [ ! -f "$packages_file" ]; then
