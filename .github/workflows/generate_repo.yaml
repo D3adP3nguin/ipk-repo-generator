@@ -14,22 +14,6 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/curated
-          - devices/ln6001/fw_v1.0.3.01/home/supported
-          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
-          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
-          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
-          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
-          - devices/ln6001/fw_v1.1.0.01/home/curated
-          - devices/ln6001/fw_v1.1.0.01/home/supported
-          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
-          - devices/ln6001/fw_v1.1.0.01/privacyui/supported
-          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
-          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
-          - devices/ln6002/fw_v1.0.1.01/home/curated
-          - devices/ln6002/fw_v1.0.1.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
-          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
 
     steps:
     - name: Checkout repository
