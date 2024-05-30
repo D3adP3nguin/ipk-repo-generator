@@ -30,7 +30,7 @@ device=$1
 fw=$2
 flavor=$3
 category=$4
-ipk_dir="./output/${device}/fw_${fw}/${flavor}/${category}"
+ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
 manifest_file="$ipk_dir/Packages.manifest"
 
 generate_packages_manifest "$ipk_dir" "$manifest_file"

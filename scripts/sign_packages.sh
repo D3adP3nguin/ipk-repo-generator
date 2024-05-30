@@ -6,7 +6,7 @@ fw=$2
 flavor=$3
 category=$4
 
-packages_file="./output/${device}/fw_${fw}/${flavor}/${category}/Packages"
+packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
 sig_file="${packages_file}.sig"
 usign_key="${USIGN_PRIVATE_KEY}"
 usign_path="./output/usign"

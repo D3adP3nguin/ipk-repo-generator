@@ -63,7 +63,7 @@ jobs:
 
     - name: Create necessary directories
       run: |
-        mkdir -p ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        mkdir -p ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Copy precompiled usign binary
       run: |
@@ -77,17 +77,17 @@ jobs:
 
     - name: Copy precompiled IPKs
       run: |
-        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
-        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
-        echo "IPK files in ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
-        ls -l ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
+        echo "Copying IPK files from ${{ matrix.path }} to ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/"
+        find ${{ matrix.path }} -type f -name '*.ipk' -exec cp {} ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/ \;
+        echo "IPK files in ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/:"
+        ls -l ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/
 
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
         ./scripts/generate_packages.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
         echo "Contents of Packages file:"
-        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 
     - name: Compress Packages file
       run: |
@@ -99,7 +99,7 @@ jobs:
         chmod +x ./scripts/generate_manifest.sh
         ./scripts/generate_manifest.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
         echo "Contents of Packages.manifest file:"
-        cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
+        cat ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages.manifest
 
     - name: Sign Packages file
       env:
@@ -110,20 +110,20 @@ jobs:
 
     - name: Prepare files for zipping
       run: |
-        mkdir -p ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
-        cp -r ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_zip/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        mkdir -p ./to_zip/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
+        cp -r ./output/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/* ./to_zip/${{ env.device }}/${{ env.fw }}/${{ env.flavor }}/${{ env.category }}
 
     - name: Zip files
       run: |
         cd ./to_zip
-        zip -r ../${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip *
+        zip -r ../${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip *
         cd ..
 
     - name: Upload individual artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
-        path: ./${{ env.device }}-fw_${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip
+        name: ${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}
+        path: ./${{ env.device }}-${{ env.fw }}-${{ env.flavor }}-${{ env.category }}-${{ env.date }}.zip
         if-no-files-found: warn
         compression-level: 6
         overwrite: false

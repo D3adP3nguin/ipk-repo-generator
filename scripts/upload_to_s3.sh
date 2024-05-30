@@ -24,9 +24,4 @@ for artifact in "$artifacts_dir"/*; do
     echo "Uploading $artifact to $dest_path"
     aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
     if [ $? -ne 0 ]; then
-        echo "Error: Failed to upload $artifact to $dest_path"
-        exit 1
-    fi
-done
-
-echo "All artifacts uploaded to S3 bucket $bucket_name successfully."
+        echo
