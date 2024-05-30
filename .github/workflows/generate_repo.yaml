@@ -14,7 +14,7 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-
+          # Add other paths as needed
 
     steps:
     - name: Checkout repository
@@ -144,12 +144,12 @@ jobs:
         for file in $(find ./artifacts -type f -name '*.zip'); do
           base_name=$(basename $file)
           device=$(echo $base_name | cut -d- -f1)
-          fw=$(echo $base_name | cut -d- -f2)
+          fw=$(echo $base_name | cut -d- -f2 | sed 's/fw_//')
           flavor=$(echo $base_name | cut -d- -f3)
           category=$(echo $base_name | cut -d- -f4)
           date=$(echo $base_name | cut -d- -f5 | sed 's/\.zip//')
-          
-          new_path="master/$device/$fw/$flavor/$category"
+
+          new_path="master/$device/fw_$fw/$flavor/$category"
           mkdir -p $new_path
           mv $file $new_path/${category}.zip
         done
@@ -157,8 +157,8 @@ jobs:
 
     - name: Create master ZIP file
       run: |
-        mkdir -p master_repo/artifacts
-        cp -r ./artifacts/* master_repo/artifacts/
+        mkdir -p master_repo
+        cp -r master/* master_repo/
         zip -r master_repo.zip master_repo
         echo "Contents of master_repo:"
         ls -R master_repo
