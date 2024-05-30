@@ -14,7 +14,6 @@ jobs:
         path:
           - devices/ln6001/fw_v1.0.3.01/enterprise/curated
           - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          # Add other paths as needed
 
     steps:
     - name: Checkout repository
@@ -70,7 +69,7 @@ jobs:
     - name: Generate Packages file
       run: |
         chmod +x ./scripts/generate_packages.sh
-        ./scripts/generate_packages.sh ${{ env.category }}
+        ./scripts/generate_packages.sh ${{ env.device }} ${{ env.fw }} ${{ env.flavor }} ${{ env.category }}
         echo "Contents of Packages file:"
         cat ./output/${{ env.device }}/fw_${{ env.fw }}/${{ env.flavor }}/${{ env.category }}/Packages
 

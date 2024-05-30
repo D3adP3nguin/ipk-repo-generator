@@ -1,13 +1,5 @@
 #!/bin/bash
 
-# Hardcoded paths
-OUTPUT_DIR="./output"
-USIGN_PATH="./output/usign"
-
-# Ensure necessary directories exist
-mkdir -p "$OUTPUT_DIR"
-mkdir -p "$(dirname "$USIGN_PATH")"
-
 # Function to extract control file from IPK
 extract_control_from_ipk() {
     ipk_file=$1
@@ -82,11 +74,11 @@ generate_packages() {
 }
 
 # Main script
-device="${device}"
-fw="${fw}"
-flavor="${flavor}"
-category=$1
-ipk_dir="./output/${device}/${fw}/${flavor}/${category}"
+device=$1
+fw=$2
+flavor=$3
+category=$4
+ipk_dir="./output/${device}/fw_${fw}/${flavor}/${category}"
 packages_file="${ipk_dir}/Packages"
 
 generate_packages "$ipk_dir" "$packages_file" "$category"
