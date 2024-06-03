@@ -7,7 +7,7 @@ aws_region="${AWS_REGION}"
 aws_access_key_id="${AWS_ACCESS_KEY_ID}"
 aws_secret_access_key="${AWS_SECRET_ACCESS_KEY}"
 
-# Check if artifacts directory exists
+# Check if the artifacts directory exists
 if [ ! -d "$artifacts_dir" ]; then
     echo "Error: Artifacts directory $artifacts_dir does not exist."
     exit 1
@@ -24,4 +24,9 @@ for artifact in "$artifacts_dir"/*; do
     echo "Uploading $artifact to $dest_path"
     aws s3 cp "$artifact" "$dest_path" --recursive --sse AES256
     if [ $? -ne 0 ]; then
-        echo
+        echo "Error: Failed to upload $artifact to $dest_path"
+        exit 1
+    fi
+done
+
+echo "All artifacts uploaded to S3 bucket $bucket_name successfully."

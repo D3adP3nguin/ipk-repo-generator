@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Function to extract control file from IPK
+# Function to extract the control file from an IPK package and append it to the output file
 extract_control_from_ipk() {
     ipk_file=$1
     output_file=$2
@@ -33,7 +33,7 @@ extract_control_from_ipk() {
         exit 1
     fi
 
-    # Add the tag to the Description field
+    # Add the appropriate tag to the Description field based on the category
     if [ "$category" == "curated" ]; then
         tag="[Linksys Curated]"
     elif [ "$category" == "supported" ]; then
@@ -46,26 +46,28 @@ extract_control_from_ipk() {
         sed -i "s/^Description:/Description: $tag /" "$control_file"
     fi
 
+    # Append the control file contents to the output file
     cat "$control_file" >> "$output_file"
 
-    # Add Filename field
+    # Add the Filename field to the output file
     echo "Filename: $filename" >> "$output_file"
 
-    # Cleanup temporary files
+    # Clean up temporary files
     rm temp.tar control.tar.gz "$control_file"
     echo "" >> "$output_file" # Add an empty line between entries
 }
 
-# Function to generate Packages file
+# Function to generate the Packages file by processing each IPK package in the directory
 generate_packages() {
     ipk_dir=$1
     output_file=$2
     category=$3
 
-    > "$output_file" # Empty the file
+    > "$output_file" # Empty the file before appending new data
 
     echo "Looking for IPK files in directory: $ipk_dir"
 
+    # Find all IPK files in the directory and process each one
     find "$ipk_dir" -type f -name '*.ipk' | while read -r ipk; do
         extract_control_from_ipk "$ipk" "$output_file" "$category"
     done
@@ -73,7 +75,7 @@ generate_packages() {
     echo "Packages file generated at $output_file"
 }
 
-# Main script
+# Main script execution
 device=$1
 fw=$2
 flavor=$3
@@ -83,7 +85,7 @@ packages_file="${ipk_dir}/Packages"
 
 generate_packages "$ipk_dir" "$packages_file" "$category"
 
-# Verify the Packages file is not empty
+# Verify that the Packages file is not empty
 if [ ! -s "$packages_file" ]; then
     echo "Error: Packages file is empty or does not exist."
     exit 1

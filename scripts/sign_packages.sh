@@ -6,6 +6,7 @@ fw=$2
 flavor=$3
 category=$4
 
+# Define the path to the Packages file and the signature file
 packages_file="./output/${device}/${fw}/${flavor}/${category}/Packages"
 sig_file="${packages_file}.sig"
 usign_key="${USIGN_PRIVATE_KEY}"
@@ -19,7 +20,7 @@ if [ $? -ne 0 ]; then
 fi
 echo "$usign_key" > "$temp_usign_key"
 
-# Ensure the temp key file has the correct permissions
+# Ensure the temporary key file has the correct permissions
 chmod 600 "$temp_usign_key"
 
 # Check if the Packages file exists
@@ -50,7 +51,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Cleanup temporary key file
+# Clean up the temporary key file
 rm "$temp_usign_key"
 
 echo "Packages.sig file generated at $sig_file"
