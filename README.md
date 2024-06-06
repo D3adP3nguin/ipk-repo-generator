@@ -27,7 +27,9 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
 
 3. **Add your IPK files:**
 
-    Place the IPK files you want to include in the appropriate `curated` or `supported` directories under the `devices` directory. The directory structure should be as follows:
+    Place the IPK files you want to include in the appropriate `curated` or `supported` directories under the `devices/Device#/fw#/` directory. 
+
+    The directory structure should be as follows:
 
     ```
     devices/
@@ -64,6 +66,16 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
             curated/
             supported/
     ```
+
+    - **Device#**: Represents the device model (e.g., Device1, Device2).
+    - **fw#**: Represents the firmware version (e.g., fw1, fw2).
+    - **flavor**: Represents the type of firmware (e.g., `enterprise`, `home`, `custom`).
+    - **category**: Represents the type of packages (e.g., `curated`, `supported`).
+
+    - **Curated**: Packages that the user has custom created.
+    - **Supported**: Packages that are from official sources.
+
+    Maintaining this directory structure is important for the GitHub Actions workflow to function correctly.
 
 ### Running the Workflow
 
@@ -127,11 +139,6 @@ If you prefer to run the scripts manually on your local machine instead of using
     ./scripts/upload_to_s3.sh
     ```
 
-### Merging Changes
-
-1. **Create a Pull Request:**
-
-    Once you have completed your changes and pushed them to your branch, create a pull request on GitHub to merge your changes into the `main` branch.
 
 ## Notes
 
@@ -140,14 +147,7 @@ If you prefer to run the scripts manually on your local machine instead of using
 - Use detailed commit messages to describe the changes made.
 - Refer to the [GitHub Wiki](https://github.com/D3adP3nguin/ipk-repo-generator/wiki) for detailed documentation on each script and the GitHub Actions workflow.
 
-## Contributing
-
-Feel free to fork this repository, make changes, and submit pull requests. Any contributions that help improve this project are welcome.
 
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
----
-
-By following these steps, you can easily set up and manage your own custom IPK repository for OpenWRT devices using this generator.
