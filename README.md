@@ -8,7 +8,6 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
 
 - GitHub account with access to create and manage repositories
 - OpenWRT device
-- AWS account (if using S3 for hosting)
 
 ### Setup
 
@@ -77,7 +76,9 @@ If you want to run the scripts manually on your local machine:
     ./scripts/sign_packages.sh <device> <fw> <flavor> <category>
     ```
 
-5. **Upload to S3:**
+5. **Upload to S3 (Optional):**
+
+    If you want to upload the generated files to an S3 bucket, you can uncomment the lines in the GitHub Actions workflow and set up the necessary environment variables:
 
     ```sh
     export AWS_ACCESS_KEY_ID=your_access_key
