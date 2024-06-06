@@ -2,7 +2,7 @@
 
 # Read environment variables from GitHub Actions
 artifacts_dir="./artifacts"
-bucket_name="wrtrepo-out-test"
+bucket_name="[REDACTED]"
 aws_region="${AWS_REGION}"
 aws_access_key_id="${AWS_ACCESS_KEY_ID}"
 aws_secret_access_key="${AWS_SECRET_ACCESS_KEY}"

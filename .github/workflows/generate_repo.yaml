@@ -12,24 +12,22 @@ jobs:
     strategy:
       matrix:
         path:
-          - devices/ln6001/fw_v1.0.3.01/enterprise/curated
-          - devices/ln6001/fw_v1.0.3.01/enterprise/supported
-          - devices/ln6001/fw_v1.0.3.01/home/curated
-          - devices/ln6001/fw_v1.0.3.01/home/supported
-          - devices/ln6001/fw_v1.0.3.01/privacyui/curated
-          - devices/ln6001/fw_v1.0.3.01/privacyui/supported
-          - devices/ln6001/fw_v1.1.0.01/enterprise/curated
-          - devices/ln6001/fw_v1.1.0.01/enterprise/supported
-          - devices/ln6001/fw_v1.1.0.01/home/curated
-          - devices/ln6001/fw_v1.1.0.01/home/supported
-          - devices/ln6001/fw_v1.1.0.01/privacyui/curated
-          - devices/ln6001/fw_v1.1.0.01/privacyui/supported
-          - devices/ln6002/fw_v1.0.1.01/enterprise/curated
-          - devices/ln6002/fw_v1.0.1.01/enterprise/supported
-          - devices/ln6002/fw_v1.0.1.01/home/curated
-          - devices/ln6002/fw_v1.0.1.01/home/supported
-          - devices/ln6002/fw_v1.0.1.01/privacyui/curated
-          - devices/ln6002/fw_v1.0.1.01/privacyui/supported
+          - devices/Device1/fw1/enterprise/curated
+          - devices/Device1/fw1/enterprise/supported
+          - devices/Device1/fw1/home/curated
+          - devices/Device1/fw1/home/supported
+          - devices/Device1/fw1/privacyui/curated
+          - devices/Device1/fw1/privacyui/supported
+          - devices/Device1/fw2/enterprise/curated
+          - devices/Device1/fw2/enterprise/supported
+          - devices/Device1/fw2/privacyui/curated
+          - devices/Device1/fw2/privacyui/supported
+          - devices/Device2/fw1/enterprise/curated
+          - devices/Device2/fw1/enterprise/supported
+          - devices/Device2/fw1/home/curated
+          - devices/Device2/fw1/home/supported
+          - devices/Device2/fw1/privacyui/curated
+          - devices/Device2/fw1/privacyui/supported
 
     steps:
     - name: Checkout repository
