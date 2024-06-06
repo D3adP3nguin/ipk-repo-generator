@@ -35,9 +35,9 @@ extract_control_from_ipk() {
 
     # Add the appropriate tag to the Description field based on the category
     if [ "$category" == "curated" ]; then
-        tag="[REDACTED]"
+        tag="curated"
     elif [ "$category" == "supported" ]; then
-        tag="[REDACTED]"
+        tag="supported"
     else
         tag=""
     fi
