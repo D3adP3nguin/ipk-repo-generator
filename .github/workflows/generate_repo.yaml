@@ -12,22 +12,24 @@ jobs:
     strategy:
       matrix:
         path:
+          - devices/Device1/fw1/custom/curated
+          - devices/Device1/fw1/custom/supported
           - devices/Device1/fw1/enterprise/curated
           - devices/Device1/fw1/enterprise/supported
           - devices/Device1/fw1/home/curated
           - devices/Device1/fw1/home/supported
-          - devices/Device1/fw1/privacyui/curated
-          - devices/Device1/fw1/privacyui/supported
+          - devices/Device1/fw2/custom/curated
+          - devices/Device1/fw2/custom/supported
           - devices/Device1/fw2/enterprise/curated
           - devices/Device1/fw2/enterprise/supported
-          - devices/Device1/fw2/privacyui/curated
-          - devices/Device1/fw2/privacyui/supported
+          - devices/Device1/fw2/home/curated
+          - devices/Device1/fw2/home/supported
+          - devices/Device2/fw1/custom/curated
+          - devices/Device2/fw1/custom/supported
           - devices/Device2/fw1/enterprise/curated
           - devices/Device2/fw1/enterprise/supported
           - devices/Device2/fw1/home/curated
           - devices/Device2/fw1/home/supported
-          - devices/Device2/fw1/privacyui/curated
-          - devices/Device2/fw1/privacyui/supported
 
     steps:
     - name: Checkout repository
@@ -126,38 +128,38 @@ jobs:
         compression-level: 6
         overwrite: false
 
-  upload-to-s3:
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+  # upload-to-s3:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
 
-    - name: Download all artifacts
-      uses: actions/download-artifact@v4
-      with:
-        path: ./artifacts
+  #   - name: Download all artifacts
+  #     uses: actions/download-artifact@v4
+  #     with:
+  #       path: ./artifacts
 
-    - name: Organize and upload to S3
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-      run: |
-        mkdir -p master
-        for file in $(find ./artifacts -type f -name '*.zip'); do
-          base_name=$(basename $file)
-          device=$(echo $base_name | cut -d- -f1)
-          fw=$(echo $base_name | cut -d- -f2 | sed 's/fw_//')
-          flavor=$(echo $base_name | cut -d- -f3)
-          category=$(echo $base_name | cut -d- -f4)
-          date=$(echo $base_name | cut -d- -f5 | sed 's/\.zip//')
+    # - name: Organize and upload to S3
+    #   env:
+    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #     AWS_REGION: ${{ secrets.AWS_REGION }}
+    #   run: |
+    #     mkdir -p master
+    #     for file in $(find ./artifacts -type f -name '*.zip'); do
+    #       base_name=$(basename $file)
+    #       device=$(echo $base_name | cut -d- -f1)
+    #       fw=$(echo $base_name | cut -d- -f2 | sed 's/fw_//')
+    #       flavor=$(echo $base_name | cut -d- -f3)
+    #       category=$(echo $base_name | cut -d- -f4)
+    #       date=$(echo $base_name | cut -d- -f5 | sed 's/\.zip//')
 
-          new_path="master/$device/fw_$fw/$flavor/$category"
-          mkdir -p $new_path
-          unzip -j -d $new_path $file
-        done
-        aws s3 sync master s3://wrtrepo-out-test
+    #       new_path="master/$device/fw_$fw/$flavor/$category"
+    #       mkdir -p $new_path
+    #       unzip -j -d $new_path $file
+    #     done
+    #     aws s3 sync master s3://wrtrepo-out-test
 
     - name: Create master ZIP file
       run: |

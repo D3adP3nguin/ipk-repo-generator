@@ -8,6 +8,7 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
 
 - GitHub account with access to create and manage repositories
 - OpenWRT device
+- AWS account (if using S3 for hosting)
 
 ### Setup
 
@@ -26,7 +27,43 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
 
 3. **Add your IPK files:**
 
-    Place the IPK files you want to include in the repository inside the `IPK_files` directory.
+    Place the IPK files you want to include in the appropriate `curated` or `supported` directories under the `devices` directory. The directory structure should be as follows:
+
+    ```
+    devices/
+      Device1/
+        fw1/
+          enterprise/
+            curated/
+            supported/
+          home/
+            curated/
+            supported/
+          custom/
+            curated/
+            supported/
+        fw2/
+          enterprise/
+            curated/
+            supported/
+          home/
+            curated/
+            supported/
+          custom/
+            curated/
+            supported/
+      Device2/
+        fw1/
+          enterprise/
+            curated/
+            supported/
+          home/
+            curated/
+            supported/
+          custom/
+            curated/
+            supported/
+    ```
 
 ### Running the Workflow
 
@@ -46,7 +83,7 @@ This repository provides a set of scripts and a GitHub Actions workflow to gener
 
 ### Manual Script Execution
 
-If you want to run the scripts manually on your local machine:
+If you prefer to run the scripts manually on your local machine instead of using the GitHub Actions workflow, follow these steps:
 
 1. **Generate Packages file:**
 
@@ -78,7 +115,7 @@ If you want to run the scripts manually on your local machine:
 
 5. **Upload to S3 (Optional):**
 
-    If you want to upload the generated files to an S3 bucket, you can uncomment the lines in the GitHub Actions workflow and set up the necessary environment variables:
+    If you want to upload the generated files to an S3 bucket, you can set up the necessary environment variables and run the upload script:
 
     ```sh
     export AWS_ACCESS_KEY_ID=your_access_key
@@ -88,13 +125,6 @@ If you want to run the scripts manually on your local machine:
 
     chmod +x ./scripts/upload_to_s3.sh
     ./scripts/upload_to_s3.sh
-    ```
-
-6. **Setup Repository:**
-
-    ```sh
-    chmod +x ./scripts/repo_setup.sh
-    ./scripts/repo_setup.sh <device> <fw> <flavor> <category>
     ```
 
 ### Merging Changes
@@ -109,3 +139,15 @@ If you want to run the scripts manually on your local machine:
 - The repository structure and file paths should be adjusted according to your specific needs.
 - Use detailed commit messages to describe the changes made.
 - Refer to the [GitHub Wiki](https://github.com/D3adP3nguin/ipk-repo-generator/wiki) for detailed documentation on each script and the GitHub Actions workflow.
+
+## Contributing
+
+Feel free to fork this repository, make changes, and submit pull requests. Any contributions that help improve this project are welcome.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+By following these steps, you can easily set up and manage your own custom IPK repository for OpenWRT devices using this generator.
